@@ -1,81 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
+  <meta charset="UTF-8">
   <title>İşletme Bilgileri</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-
-    label {
-      font-weight: bold;
-    }
-
-    input {
-      padding: 10px;
-      margin-bottom: 15px;
-      width: 100%;
-      max-width: 400px;
-      box-sizing: border-box;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
 </head>
 <body>
-  <h2>Yeni İşletme Ekle</h2>
-  <form id="businessForm">
-    <label>İşletme Adı:</label><br>
-    <input type="text" id="name" placeholder="Örn: Manço Cafe"><br>
+  <h1>İşletme Bilgileri</h1>
+  <form>
+    <label for="ad">İşletme Adı:</label><br>
+    <input type="text" id="ad" name="ad"><br><br>
 
-    <label>Google Place ID:</label><br>
-    <input type="text" id="place_id" placeholder="Örn: ChIJ..."><br>
+    <label for="place_id">Google Place ID:</label><br>
+    <input type="text" id="place_id" name="place_id"><br><br>
 
-    <label>Instagram Adresi:</label><br>
-    <input type="text" id="instagram" placeholder="https://www.instagram.com/..."><br>
+    <label for="instagram">Instagram:</label><br>
+    <input type="text" id="instagram" name="instagram"><br><br>
 
     <button type="submit">Kaydet</button>
   </form>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = "https://cwijtyuqileaznsiqwco.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aWp0eXVxaWxlYXpuc2lxd2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTMyNjcsImV4cCI6MjA2MDU4OTI2N30.-W_51BY3N6rd4F-gaP0ZJseoBR_vC9DFo_sRVFEx8yg";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseUrl = 'https://gptforce16.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdGZvcmNlMTYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcxMzMwMzc2NiwiZXhwIjoxNzQ0ODc5NzY2fQ.2Zw_mRv-fBR3zAqsmYpJdvBHzA3q6B99U6gRnkM38ck';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById("businessForm").addEventListener("submit", async function(e) {
+    document.querySelector('form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const name = document.getElementById("name").value.trim();
-      const place_id = document.getElementById("place_id").value.trim();
-      const instagram = document.getElementById("instagram").value.trim();
+      const ad = document.querySelector('#ad').value.trim();
+      const placeId = document.querySelector('#place_id').value.trim();
+      const instagram = document.querySelector('#instagram').value.trim();
 
-      if (!place_id || !instagram) {
+      if (!ad || !placeId || !instagram) {
         alert("Lütfen tüm alanları doldurun.");
         return;
       }
 
       const { data, error } = await supabase
-        .from("isletmeler")
-        .insert([{ name, place_id, instagram }]);
+        .from('isletmeler')
+        .insert([{ ad: ad, place_id: placeId, instagram: instagram }]);
 
       if (error) {
+        console.error(error);
         alert("Hata oluştu: " + error.message);
       } else {
         alert("Başarıyla kaydedildi!");
-        document.getElementById("businessForm").reset();
+        document.querySelector('form').reset();
       }
     });
   </script>
