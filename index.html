@@ -52,14 +52,18 @@
       const instagram = document.getElementById('instagram').value.trim();
       const mesajDiv = document.getElementById('mesaj');
 
+      alert("Veriler gönderiliyor...");
+
       const { data, error } = await supabase
         .from('isletmeler')
         .insert([{ ad, place_id, instagram }]);
 
       if (error) {
+        alert("Hata: " + error.message);
         mesajDiv.style.color = "red";
         mesajDiv.innerText = "Hata oluştu: " + error.message;
       } else {
+        alert("İşlem tamam! İşletme eklendi.");
         mesajDiv.style.color = "green";
         mesajDiv.innerText = "İşletme başarıyla eklendi!";
         document.getElementById('form').reset();
