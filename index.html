@@ -4,6 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel - Hediye Çarkı</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    input {
+      display: block;
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-weight: bold;
+    }
+
+    #mesaj {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <h1>İşletme Ekle</h1>
@@ -26,17 +50,18 @@
       const ad = document.getElementById('ad').value.trim();
       const place_id = document.getElementById('place_id').value.trim();
       const instagram = document.getElementById('instagram').value.trim();
+      const mesajDiv = document.getElementById('mesaj');
 
       const { data, error } = await supabase
         .from('isletmeler')
         .insert([{ ad, place_id, instagram }]);
 
       if (error) {
-        console.error(error);
-        document.getElementById('mesaj').innerText = "Hata oluştu: " + error.message;
+        mesajDiv.style.color = "red";
+        mesajDiv.innerText = "Hata oluştu: " + error.message;
       } else {
-        console.log("Başarıyla eklendi:", data);
-        document.getElementById('mesaj').innerText = "İşletme başarıyla eklendi!";
+        mesajDiv.style.color = "green";
+        mesajDiv.innerText = "İşletme başarıyla eklendi!";
         document.getElementById('form').reset();
       }
     });
