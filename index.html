@@ -2,53 +2,98 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>İşletme Bilgileri</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yönetim Paneli</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-  <h1>İşletme Bilgileri</h1>
-  <form>
-    <label for="ad">İşletme Adı:</label><br>
-    <input type="text" id="ad" name="ad"><br><br>
 
-    <label for="place_id">Google Place ID:</label><br>
-    <input type="text" id="place_id" name="place_id"><br><br>
+  <h2>İşletme Ekle</h2>
 
-    <label for="instagram">Instagram:</label><br>
-    <input type="text" id="instagram" name="instagram"><br><br>
+  <input type="text" id="ad" placeholder="İşletme Adı">
+  <input type="text" id="place_id" placeholder="Place ID">
+  <input type="text" id="instagram" placeholder="Instagram Adresi">
+  <button onclick="isletmeEkle()">Kaydet</button>
 
-    <button type="submit">Kaydet</button>
-  </form>
+  <h2 style="margin-top: 40px;">Kayıtlı İşletmeler</h2>
+  <div id="isletmelerListesi"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supabaseUrl = 'https://gptforce16.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdGZvcmNlMTYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcxMzMwMzc2NiwiZXhwIjoxNzQ0ODc5NzY2fQ.2Zw_mRv-fBR3zAqsmYpJdvBHzA3q6B99U6gRnkM38ck';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    document.querySelector('form').addEventListener('submit', async function(e) {
-      e.preventDefault();
+    const supabaseUrl = 'https://cwijtyuqileaznsiqwco.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aWp0eXVxaWxlYXpuc2lxd2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTMyNjcsImV4cCI6MjA2MDU4OTI2N30.-W_51BY3N6rd4F-gaP0ZJseoBR_vC9DFo_sRVFEx8yg';
 
-      const ad = document.querySelector('#ad').value.trim();
-      const placeId = document.querySelector('#place_id').value.trim();
-      const instagram = document.querySelector('#instagram').value.trim();
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-      if (!ad || !placeId || !instagram) {
-        alert("Lütfen tüm alanları doldurun.");
+    async function isletmeEkle() {
+      const ad = document.getElementById('ad').value;
+      const place_id = document.getElementById('place_id').value;
+      const instagram = document.getElementById('instagram').value;
+
+      if (!ad || !place_id || !instagram) {
+        alert("Tüm alanları doldurun.");
         return;
       }
 
-      const { data, error } = await supabase
-        .from('isletmeler')
-        .insert([{ ad: ad, place_id: placeId, instagram: instagram }]);
+      const { data, error } = await supabase.from('isletmeler').insert([{ ad, place_id, instagram }]);
 
       if (error) {
-        console.error(error);
         alert("Hata oluştu: " + error.message);
-      } else {
-        alert("Başarıyla kaydedildi!");
-        document.querySelector('form').reset();
+        return;
       }
-    });
+
+      alert("İşletme eklendi!");
+      document.getElementById('ad').value = "";
+      document.getElementById('place_id').value = "";
+      document.getElementById('instagram').value = "";
+      isletmeleriYukle(); // Listeyi güncelle
+    }
+
+    async function isletmeleriYukle() {
+      const { data, error } = await supabase.from('isletmeler').select('*');
+
+      const liste = document.getElementById('isletmelerListesi');
+      liste.innerHTML = '';
+
+      if (error) {
+        liste.innerHTML = "<p>Veriler yüklenemedi.</p>";
+        return;
+      }
+
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <strong>${item.ad}</strong><br>
+          <strong>Place ID:</strong> ${item.place_id}<br>
+          <strong>Instagram:</strong> <a href="${item.instagram}" target="_blank">${item.instagram}</a>
+        `;
+        liste.appendChild(div);
+      });
+    }
+
+    isletmeleriYukle(); // Sayfa yüklenince listeyi getir
   </script>
+
 </body>
 </html>
