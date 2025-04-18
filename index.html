@@ -1,73 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>İşletme Paneli</title>
+  <title>İşletme Bilgileri</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input {
+      padding: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <h1>İşletme Bilgileri</h1>
-
+  <h2>Yeni İşletme Ekle</h2>
   <form id="businessForm">
-    <label>İşletme Adı:</label><br />
-    <input type="text" id="name" /><br /><br />
+    <label>İşletme Adı:</label><br>
+    <input type="text" id="name" placeholder="Örn: Manço Cafe"><br>
 
-    <label>Google Place ID:</label><br />
-    <input type="text" id="placeId" /><br /><br />
+    <label>Google Place ID:</label><br>
+    <input type="text" id="place_id" placeholder="Örn: ChIJ..."><br>
 
-    <label>Instagram:</label><br />
-    <input type="text" id="instagram" /><br /><br />
+    <label>Instagram Adresi:</label><br>
+    <input type="text" id="instagram" placeholder="https://www.instagram.com/..."><br>
 
     <button type="submit">Kaydet</button>
   </form>
 
   <script>
-    const SUPABASE_URL = "https://cwijtyuquileaznsiqwco.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ..."; // tamamını koy
+    const SUPABASE_URL = "https://cwijtyuqileaznsiqwco.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aWp0eXVxaWxlYXpuc2lxd2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTMyNjcsImV4cCI6MjA2MDU4OTI2N30.-W_51BY3N6rd4F-gaP0ZJseoBR_vC9DFo_sRVFEx8yg";
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const form = document.getElementById("businessForm");
-
-    async function fetchData() {
-      const { data, error } = await supabase
-        .from("isletmeler")
-        .select("*")
-        .limit(1)
-        .single();
-
-      if (data) {
-        document.getElementById("name").value = data.name || "";
-        document.getElementById("placeId").value = data.place_id || "";
-        document.getElementById("instagram").value = data.instagram || "";
-      }
-    }
-
-    fetchData();
-
-    form.addEventListener("submit", async (e) => {
+    document.getElementById("businessForm").addEventListener("submit", async function(e) {
       e.preventDefault();
 
-      const name = document.getElementById("name").value;
-      const placeId = document.getElementById("placeId").value;
-      const instagram = document.getElementById("instagram").value;
+      const name = document.getElementById("name").value.trim();
+      const place_id = document.getElementById("place_id").value.trim();
+      const instagram = document.getElementById("instagram").value.trim();
 
-      const { data: existing } = await supabase
+      if (!place_id || !instagram) {
+        alert("Lütfen tüm alanları doldurun.");
+        return;
+      }
+
+      const { data, error } = await supabase
         .from("isletmeler")
-        .select("*")
-        .limit(1)
-        .single();
+        .insert([{ name, place_id, instagram }]);
 
-      if (existing) {
-        await supabase
-          .from("isletmeler")
-          .update({ name, place_id: placeId, instagram })
-          .eq("id", existing.id);
-        alert("Güncellendi!");
+      if (error) {
+        alert("Hata oluştu: " + error.message);
       } else {
-        await supabase
-          .from("isletmeler")
-          .insert({ name, place_id: placeId, instagram });
-        alert("Kaydedildi!");
+        alert("Başarıyla kaydedildi!");
+        document.getElementById("businessForm").reset();
       }
     });
   </script>
