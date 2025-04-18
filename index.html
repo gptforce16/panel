@@ -1,38 +1,75 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>İşletmeler Listesi</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <title>İşletme Paneli</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
-  <h1>İşletmeler</h1>
-  <ul id="isletmelerListesi"></ul>
+  <h1>İşletme Bilgileri</h1>
+
+  <form id="businessForm">
+    <label>İşletme Adı:</label><br />
+    <input type="text" id="name" /><br /><br />
+
+    <label>Google Place ID:</label><br />
+    <input type="text" id="placeId" /><br /><br />
+
+    <label>Instagram:</label><br />
+    <input type="text" id="instagram" /><br /><br />
+
+    <button type="submit">Kaydet</button>
+  </form>
 
   <script>
-    const supabaseUrl = 'https://cwijtyuqileaznsiqwco.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aWp0eXVxaWxlYXpuc2lxd2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTMyNjcsImV4cCI6MjA2MDU4OTI2N30.-W_51BY3N6rd4F-gaP0ZJseoBR_vC9DFo_sRVFEx8yg';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const SUPABASE_URL = "https://cwijtyuquileaznsiqwco.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ..."; // tamamını koy
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function getIsletmeler() {
+    const form = document.getElementById("businessForm");
+
+    async function fetchData() {
       const { data, error } = await supabase
-        .from('isletmeler')
-        .select('*');
+        .from("isletmeler")
+        .select("*")
+        .limit(1)
+        .single();
 
-      if (error) {
-        console.error('Hata:', error);
-        return;
+      if (data) {
+        document.getElementById("name").value = data.name || "";
+        document.getElementById("placeId").value = data.place_id || "";
+        document.getElementById("instagram").value = data.instagram || "";
       }
-
-      const liste = document.getElementById('isletmelerListesi');
-      data.forEach(isletme => {
-        const li = document.createElement('li');
-        li.textContent = `Place ID: ${isletme.place_id}, Instagram: ${isletme.instagram}`;
-        liste.appendChild(li);
-      });
     }
 
-    getIsletmeler();
+    fetchData();
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const placeId = document.getElementById("placeId").value;
+      const instagram = document.getElementById("instagram").value;
+
+      const { data: existing } = await supabase
+        .from("isletmeler")
+        .select("*")
+        .limit(1)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from("isletmeler")
+          .update({ name, place_id: placeId, instagram })
+          .eq("id", existing.id);
+        alert("Güncellendi!");
+      } else {
+        await supabase
+          .from("isletmeler")
+          .insert({ name, place_id: placeId, instagram });
+        alert("Kaydedildi!");
+      }
+    });
   </script>
 </body>
 </html>
