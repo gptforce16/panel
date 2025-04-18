@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>İşletmeler Listesi</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>İşletmeler</h1>
+  <ul id="isletmelerListesi"></ul>
+
+  <script>
+    const supabaseUrl = 'https://cwijtyuqileaznsiqwco.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aWp0eXVxaWxlYXpuc2lxd2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTMyNjcsImV4cCI6MjA2MDU4OTI2N30.-W_51BY3N6rd4F-gaP0ZJseoBR_vC9DFo_sRVFEx8yg';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function getIsletmeler() {
+      const { data, error } = await supabase
+        .from('isletmeler')
+        .select('*');
+
+      if (error) {
+        console.error('Hata:', error);
+        return;
+      }
+
+      const liste = document.getElementById('isletmelerListesi');
+      data.forEach(isletme => {
+        const li = document.createElement('li');
+        li.textContent = `Place ID: ${isletme.place_id}, Instagram: ${isletme.instagram}`;
+        liste.appendChild(li);
+      });
+    }
+
+    getIsletmeler();
+  </script>
+</body>
+</html>
