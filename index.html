@@ -2,73 +2,83 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel - Hediye Çarkı</title>
+  <title>HTML Üretici</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       padding: 20px;
+      background-color: #f4f4f4;
     }
-
-    input {
+    input, button, textarea {
       display: block;
-      margin-bottom: 10px;
-      padding: 8px;
       width: 100%;
-      max-width: 400px;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
     }
-
-    button {
-      padding: 10px 20px;
-      font-weight: bold;
-    }
-
-    #mesaj {
-      margin-top: 15px;
-      font-weight: bold;
+    textarea {
+      height: 400px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>İşletme Ekle</h1>
-  <form id="form">
-    <input type="text" id="ad" placeholder="İşletme Adı" required />
-    <input type="text" id="place_id" placeholder="Google Place ID" required />
-    <input type="text" id="instagram" placeholder="Instagram Adresi" required />
-    <button type="submit">Kaydet</button>
-  </form>
-  <div id="mesaj"></div>
+  <h2>Hediye Çarkı HTML Oluştur</h2>
+  <label for="placeid">Google Place ID:</label>
+  <input type="text" id="placeid" placeholder="örnek: ChIJaSn0O7o-yhQRjjiw9hjH4vk">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <label for="instagram">Instagram Kullanıcı Adı:</label>
+  <input type="text" id="instagram" placeholder="örnek: manco.caferestoran">
+
+  <button onclick="uretir()">HTML Oluştur</button>
+
+  <textarea id="htmlSonuc" readonly></textarea>
+
   <script>
-    const supabaseUrl = 'https://cwijtyuqileaznsiqwco.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aWp0eXVxaWxlYXpuc2lxd2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTMyNjcsImV4cCI6MjA2MDU4OTI2N30.-W_51BY3N6rd4F-gaP0ZJseoBR_vC9DFo_sRVFEx8yg';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    function uretir() {
+      const placeid = document.getElementById('placeid').value.trim();
+      const ig = document.getElementById('instagram').value.trim();
 
-    document.getElementById('form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const ad = document.getElementById('ad').value.trim();
-      const place_id = document.getElementById('place_id').value.trim();
-      const instagram = document.getElementById('instagram').value.trim();
-      const mesajDiv = document.getElementById('mesaj');
-
-      alert("Veriler gönderiliyor...");
-
-      const { data, error } = await supabase
-        .from('isletmeler')
-        .insert([{ ad, place_id, instagram }]);
-
-      if (error) {
-        alert("Hata: " + error.message);
-        mesajDiv.style.color = "red";
-        mesajDiv.innerText = "Hata oluştu: " + error.message;
-      } else {
-        alert("İşlem tamam! İşletme eklendi.");
-        mesajDiv.style.color = "green";
-        mesajDiv.innerText = "İşletme başarıyla eklendi!";
-        document.getElementById('form').reset();
+      if (!placeid || !ig) {
+        alert("Lütfen her iki alanı da doldurun.");
+        return;
       }
-    });
+
+      const htmlKod = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hediye Çarkı</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS kodların buraya gelecek (dilersen ekleyebilirim) */
+  </style>
+</head>
+<body>
+  <h1>Hediye Çarkına Hoş Geldin</h1>
+
+  <p>
+    <a href="https://search.google.com/local/writereview?placeid=${placeid}" target="_blank">
+      👉 Google Yorum Sayfasına Git
+    </a>
+  </p>
+
+  <p>
+    <a href="instagram://user?username=${ig}" 
+       onclick="window.location='https://instagram.com/${ig}'" 
+       style="font-weight: bold; color: #E1306C;">
+       👉 Instagram Sayfamızı Takip Et
+    </a>
+  </p>
+
+  <!-- Devamı (şifre alanı, çark, JS kodu vs) burada olacak -->
+
+</body>
+</html>`;
+
+      document.getElementById('htmlSonuc').value = htmlKod;
+    }
   </script>
 </body>
 </html>
