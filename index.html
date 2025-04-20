@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>HTML Oluştur ve İndir</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Üretici</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       padding: 20px;
     }
     input, button {
       width: 100%;
       padding: 12px;
-      margin-top: 10px;
+      margin-bottom: 10px;
       font-size: 16px;
-      box-sizing: border-box;
+    }
+    #indirLink {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h2>HTML Üretici</h2>
+  <h1>HTML Üretici</h1>
   <input type="text" id="placeId" placeholder="Google Place ID">
   <input type="text" id="instaUser" placeholder="Instagram Kullanıcı Adı">
   <button onclick="uret()">HTML Dosyasını İndir</button>
-  <a id="indirLink" style="display:none;" download="hediye.html">Dosyayı indir</a>
+  <a id="indirLink" download="index.html">İndir</a>
 
   <script>
     function uret() {
@@ -32,28 +34,41 @@
 
       const html = `<!DOCTYPE html>
 <html lang="tr">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Hediye Çarkı</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hediye Çarkı</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    #cak { margin-top: 20px; }
+  </style>
+</head>
 <body>
-<h1>Yorum ve Takip</h1>
-<a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">Google Yorum</a><br>
-<a href="https://instagram.com/${insta}" target="_blank">Instagram Takip</a><br><br>
-<input type="password" id="sifre" placeholder="Şifre gir">
-<button onclick="kontrol()">Çarkı Aç</button>
-<div id="cak" style="display:none;">
-  <p>Çark burada dönecek (çark kodu buraya gelecek)</p>
-</div>
-<script>
-const sifreDogru = "1234";
-function kontrol() {
-  const girilen = document.getElementById("sifre").value;
-  if (girilen === sifreDogru) {
-    document.getElementById("cak").style.display = "block";
-  } else {
-    alert("Şifre yanlış");
-  }
-}
-</script>
-</body></html>`;
+  <h1>Yorum ve Takip</h1>
+  <a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">Google Yorum Yap</a><br><br>
+  <a href="https://instagram.com/${insta}" target="_blank">Instagram Takip Et</a><br><br>
+
+  <input type="password" id="sifre" placeholder="Şifre girin"><br><br>
+  <button onclick="kontrol()">Çarkı Aç</button>
+
+  <div id="cak" style="display:none;">
+    <h2>Hediye Çarkı</h2>
+    <p>Buraya çark animasyonu ve mantığı entegre edilecek.</p>
+  </div>
+
+  <script>
+    const sifreDogru = "1234";
+    function kontrol() {
+      const girilen = document.getElementById("sifre").value;
+      if (girilen === sifreDogru) {
+        document.getElementById("cak").style.display = "block";
+      } else {
+        alert("Şifre yanlış!");
+      }
+    }
+  <\/script>
+</body>
+</html>`;
 
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
