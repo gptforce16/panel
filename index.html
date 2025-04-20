@@ -40,9 +40,9 @@
   </style>
 </head>
 <body>
-  <h2>Google'da yorum yap, şifre ile giriş yap ve hediyeni kazan!</h2>
+  <h2>Çevir Kazan!</h2>
   <a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">Google Yorum Yap</a><br><br>
-  <a href="https://instagram.com/${insta}" target="_blank">Instagram Sayfamız</a><br><br>
+  <a href="https://instagram.com/${insta}" target="_blank">Instagram Sayfamızı Takip Et</a><br><br>
 
   <input type="password" id="sifre" placeholder="Şifreyi girin" />
   <button onclick="giris()">Giriş Yap</button>
@@ -73,7 +73,7 @@
       setTimeout(() => {
         const sonuc = ["Anahtarlık", "Kalem", "Çakmak", "Not Defteri"];
         const index = Math.floor((derece % 360) / 90);
-        document.getElementById("sonuc").innerText = "Kazandığınız: " + sonuc[index];
+        document.getElementById("sonuc").innerText = "Tebrikler! Hediyeniz: " + sonuc[index];
       }, 4000);
     }
   <\/script>
