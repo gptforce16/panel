@@ -2,132 +2,248 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hediye Çarkı HTML Üretici</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTML Üretici</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      margin: 0;
+      font-family: sans-serif;
+      background: #f8f9fa;
       padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
+      margin: 0;
       color: #333;
     }
 
-    label {
-      margin-top: 15px;
-      font-weight: bold;
-      display: block;
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
     }
 
-    input, button, textarea {
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, textarea, button {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      margin-top: 8px;
-      box-sizing: border-box;
+      max-width: 600px;
+      margin: 10px auto;
+      display: block;
+      padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 15px;
     }
 
     button {
       background-color: #007bff;
       color: white;
       border: none;
-      margin-top: 16px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.3s;
     }
 
     button:hover {
       background-color: #0056b3;
     }
 
-    #copyBtn {
-      background-color: #28a745;
-    }
-
-    #copyBtn:hover {
-      background-color: #1e7e34;
-    }
-
     textarea {
-      height: 350px;
-      margin-top: 20px;
-      resize: vertical;
+      height: 400px;
+      white-space: pre;
     }
 
     @media (max-width: 600px) {
-      h2 {
-        font-size: 1.4rem;
-      }
-
-      input, button, textarea {
-        font-size: 15px;
-      }
+      h1 { font-size: 1.4rem; }
+      textarea { height: 300px; font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <h2>Hediye Çarkı HTML Üretici</h2>
+  <h1>Hediye Çarkı HTML Üretici</h1>
 
-  <label for="placeid">Google Place ID:</label>
-  <input type="text" id="placeid" placeholder="Örn: ChIJaSn0O7o-yhQRjjiw9hjH4vk">
+  <label for="placeId">Google Place ID:</label>
+  <input type="text" id="placeId" placeholder="örnek: ChIJaSn0O7o-yhQRjjiw9hjH4vk" />
 
   <label for="instagram">Instagram Kullanıcı Adı:</label>
-  <input type="text" id="instagram" placeholder="Örn: manco.caferestoran">
+  <input type="text" id="instagram" placeholder="örnek: manco.caferestoran" />
 
-  <button onclick="uretir()">HTML Oluştur</button>
+  <button onclick="olusturHTML()">HTML Oluştur</button>
 
-  <textarea id="htmlSonuc" readonly placeholder="HTML kodunuz burada görünecek..."></textarea>
-  <button id="copyBtn" onclick="kopyala()">📋 Kodu Kopyala</button>
+  <textarea id="sonucKod" readonly placeholder="HTML burada görünecek..."></textarea>
+  <button onclick="kopyalaKod()">Kodu Kopyala</button>
 
   <script>
-    function uretir() {
-      const placeid = document.getElementById('placeid').value.trim();
-      const ig = document.getElementById('instagram').value.trim();
+    function olusturHTML() {
+      const placeId = document.getElementById("placeId").value.trim();
+      const instagram = document.getElementById("instagram").value.trim();
 
-      if (!placeid || !ig) {
-        alert("Lütfen her iki alanı da doldurun.");
+      if (!placeId || !instagram) {
+        alert("Lütfen hem Place ID hem de Instagram kullanıcı adını girin.");
         return;
       }
 
-      const htmlKod = `<!DOCTYPE html>
+      const html = `<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hediye Çarkı</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg, #f8f9fa, #e0e0e0);
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      color: #333;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 10px; }
+    a { color: #007bff; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+    input[type="password"], button {
+      font-size: 16px;
+      padding: 12px;
+      margin: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 80%;
+      max-width: 300px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background-color: #0056b3; }
+    #cak { display: none; margin-top: 30px; }
+    .wheel-container {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      margin: 0 auto;
+    }
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 6px solid #ccc;
+      background-image: conic-gradient(
+        #ffd54f 0% 25%,
+        #4fc3f7 25% 50%,
+        #aed581 50% 75%,
+        #ff8a65 75% 100%
+      );
+      transition: transform 4s ease-out;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    .pointer {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 30px solid #444;
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #cevirBtn { margin-top: 30px; }
+    #sonuc {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #388e3c;
+    }
+    @media (max-width: 500px) {
+      h1 { font-size: 1.5rem; }
+      input, button { font-size: 15px; width: 90%; }
+      .wheel-container { width: 200px; height: 200px; }
+    }
+  </style>
 </head>
 <body>
   <h1>Hediye Çarkına Hoş Geldin</h1>
-
   <p>
-    <a href="https://search.google.com/local/writereview?placeid=${placeid}" target="_blank">
+    <a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">
       👉 Google Yorum Sayfasına Git
     </a>
   </p>
-
   <p>
-    <a href="instagram://user?username=${ig}" 
-       onclick="window.location='https://instagram.com/${ig}'" 
+    <a href="instagram://user?username=${instagram}" 
+       onclick="window.location='https://instagram.com/${instagram}'" 
        style="font-weight: bold; color: #E1306C;">
        👉 Instagram Sayfamızı Takip Et
     </a>
   </p>
+  <h3>Şifreyi gir:</h3>
+  <input type="password" id="sifre" placeholder="Şifre" />
+  <button onclick="kontrolEt()">Çarka Git</button>
+
+  <div id="cak">
+    <div class="wheel-container">
+      <div class="wheel" id="wheel"></div>
+      <div class="pointer"></div>
+    </div>
+    <button id="cevirBtn" onclick="cevir()">🎁 Çarkı Çevir</button>
+    <p id="sonuc"></p>
+  </div>
+
+  <script>
+    const dogruSifre = "1234";
+    const hediyeler = [
+      "Anahtarlık 🔑",
+      "Çakmak 🔥",
+      "Kalem ✒️",
+      "Not Defteri 📓"
+    ];
+    let cevrildi = false;
+
+    function kontrolEt() {
+      const sifre = document.getElementById("sifre").value;
+      if (sifre === dogruSifre) {
+        document.getElementById("cak").style.display = "block";
+      } else {
+        alert("Şifre hatalı. Lütfen işletmeden tekrar isteyin.");
+      }
+    }
+
+    function cevir() {
+      if (cevrildi) {
+        alert("Çark sadece bir kez çevrilebilir!");
+        return;
+      }
+
+      const wheel = document.getElementById("wheel");
+      const derece = 3600 + Math.floor(Math.random() * 360);
+      wheel.style.transform = \`rotate(\${derece}deg)\`;
+
+      const sektor = Math.floor((360 - (derece % 360)) / 90) % 4;
+      const kazanan = hediyeler[sektor];
+
+      setTimeout(() => {
+        document.getElementById("sonuc").textContent =
+          "🎉 Tebrikler! Kazandığınız: " + kazanan;
+        document.getElementById("cevirBtn").disabled = true;
+        cevrildi = true;
+      }, 4000);
+    }
+  </script>
 </body>
 </html>`;
 
-      document.getElementById('htmlSonuc').value = htmlKod;
+      document.getElementById("sonucKod").value = html;
     }
 
-    function kopyala() {
-      const textarea = document.getElementById('htmlSonuc');
-      textarea.select();
-      textarea.setSelectionRange(0, 99999); // Mobil uyumlu kopyalama
+    function kopyalaKod() {
+      const kod = document.getElementById("sonucKod");
+      kod.select();
+      kod.setSelectionRange(0, 99999);
       document.execCommand("copy");
       alert("HTML kodu kopyalandı!");
     }
