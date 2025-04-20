@@ -1,81 +1,95 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTML Üretici</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-    #indirLink {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <h1>HTML Üretici</h1>
-  <input type="text" id="placeId" placeholder="Google Place ID">
-  <input type="text" id="instaUser" placeholder="Instagram Kullanıcı Adı">
-  <button onclick="uret()">HTML Dosyasını İndir</button>
-  <a id="indirLink" download="index.html">İndir</a>
-
-  <script>
-    function uret() {
-      const placeId = document.getElementById("placeId").value.trim();
-      const insta = document.getElementById("instaUser").value.trim();
-
-      const html = `<!DOCTYPE html>
-<html lang="tr">
-<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hediye Çarkı</title>
+  <title>HTML Üretici</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    #cak { margin-top: 20px; }
+    body { font-family: sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 300px; margin-top: 20px; }
+    button { padding: 10px; margin-top: 10px; width: 100%; }
+    #wheel { width: 200px; height: 200px; border: 5px solid #000; border-radius: 50%; margin: 20px auto; position: relative; transition: transform 4s ease-out; }
+    .prize { position: absolute; width: 50%; height: 50%; background: lightblue; transform-origin: 100% 100%; }
   </style>
 </head>
 <body>
-  <h1>Yorum ve Takip</h1>
-  <a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">Google Yorum Yap</a><br><br>
-  <a href="https://instagram.com/${insta}" target="_blank">Instagram Takip Et</a><br><br>
 
-  <input type="password" id="sifre" placeholder="Şifre girin"><br><br>
-  <button onclick="kontrol()">Çarkı Aç</button>
+  <h2>HTML Üretici</h2>
+  <input type="text" id="placeId" placeholder="Google Place ID" />
+  <input type="text" id="insta" placeholder="Instagram Kullanıcı Adı" />
+  <button onclick="olustur()">HTML Oluştur</button>
 
-  <div id="cak" style="display:none;">
-    <h2>Hediye Çarkı</h2>
-    <p>Buraya çark animasyonu ve mantığı entegre edilecek.</p>
-  </div>
+  <textarea id="output" placeholder="HTML burada görünecek..."></textarea>
+  <button onclick="kopyala()">Kopyala</button>
+  <p id="mesaj"></p>
 
   <script>
-    const sifreDogru = "1234";
-    function kontrol() {
+    function olustur() {
+      const placeId = document.getElementById("placeId").value;
+      const insta = document.getElementById("insta").value;
+
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yorum Karşılığı Hediye</title>
+  <style>
+    body { text-align: center; font-family: sans-serif; padding: 20px; }
+    #wheel { width: 200px; height: 200px; border: 5px solid #000; border-radius: 50%; margin: 20px auto; transition: transform 4s ease-out; background: conic-gradient(#f00 0% 25%, #0f0 25% 50%, #00f 50% 75%, #ff0 75% 100%); }
+    #spinBtn { padding: 10px 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h2>Google'da yorum yap, şifre ile giriş yap ve hediyeni kazan!</h2>
+  <a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">Google Yorum Yap</a><br><br>
+  <a href="https://instagram.com/${insta}" target="_blank">Instagram Sayfamız</a><br><br>
+
+  <input type="password" id="sifre" placeholder="Şifreyi girin" />
+  <button onclick="giris()">Giriş Yap</button>
+
+  <div id="wheel" style="display:none;"></div>
+  <button id="spinBtn" onclick="spin()" style="display:none;">Çevir!</button>
+  <p id="sonuc"></p>
+
+  <script>
+    const dogruSifre = "1234";
+    let dondu = false;
+
+    function giris() {
       const girilen = document.getElementById("sifre").value;
-      if (girilen === sifreDogru) {
-        document.getElementById("cak").style.display = "block";
+      if (girilen === dogruSifre) {
+        document.getElementById("wheel").style.display = "block";
+        document.getElementById("spinBtn").style.display = "inline-block";
       } else {
         alert("Şifre yanlış!");
       }
     }
-  <\/script>
+
+    function spin() {
+      if (dondu) return;
+      dondu = true;
+      const derece = Math.floor(Math.random() * 360) + 720;
+      document.getElementById("wheel").style.transform = "rotate(" + derece + "deg)";
+      setTimeout(() => {
+        const sonuc = ["Anahtarlık", "Kalem", "Çakmak", "Not Defteri"];
+        const index = Math.floor((derece % 360) / 90);
+        document.getElementById("sonuc").innerText = "Kazandığınız: " + sonuc[index];
+      }, 4000);
+    }
+  </script>
 </body>
 </html>`;
 
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const link = document.getElementById("indirLink");
-      link.href = url;
-      link.style.display = "inline-block";
-      link.click(); // otomatik indir
+      document.getElementById("output").value = html;
+      document.getElementById("mesaj").textContent = "HTML başarıyla oluşturuldu!";
+    }
+
+    function kopyala() {
+      const text = document.getElementById("output");
+      text.select();
+      document.execCommand("copy");
+      document.getElementById("mesaj").textContent = "Kod panoya kopyalandı!";
     }
   </script>
 </body>
