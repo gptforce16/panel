@@ -1,70 +1,83 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hediye Çarkı HTML Üretici</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f0f0f0;
       padding: 20px;
-      background: #f8f9fa;
     }
-    input, button, textarea {
+    label, input, button, textarea {
       display: block;
       width: 100%;
       max-width: 600px;
       margin: 10px auto;
-      padding: 10px;
       font-size: 16px;
     }
-    textarea {
-      height: 500px;
+    input, textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
-      background-color: #007bff;
+      background: #007bff;
       color: white;
       border: none;
+      padding: 10px;
+      border-radius: 6px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #0056b3;
+      background: #0056b3;
     }
-    label {
-      font-weight: bold;
+    textarea {
+      height: 400px;
+    }
+    #mesaj {
       text-align: center;
-      display: block;
-      margin-top: 20px;
+      color: green;
     }
   </style>
 </head>
 <body>
   <h2 style="text-align:center;">Hediye Çarkı HTML Oluşturucu</h2>
 
-  <label for="placeid">Google Place ID</label>
-  <input type="text" id="placeid" placeholder="Örn: ChIJaSn0O7o-yhQRjjiw9hjH4vk" />
+  <label for="placeid">Google Place ID:</label>
+  <input type="text" id="placeid" placeholder="Örn: ChIJaSn0O7o-yhQRjjiw9hjH4vk">
 
-  <label for="instagram">Instagram Kullanıcı Adı</label>
-  <input type="text" id="instagram" placeholder="Örn: manco.caferestoran" />
+  <label for="instagram">Instagram Kullanıcı Adı:</label>
+  <input type="text" id="instagram" placeholder="Örn: manco.caferestoran">
 
-  <button onclick="uret()">HTML Kodu Üret</button>
+  <button onclick="uret()">HTML Kodunu Üret</button>
 
-  <textarea id="cikti" readonly placeholder="HTML kodu burada görünecek..."></textarea>
+  <textarea id="cikti" readonly placeholder="Üretilen HTML burada görünecek..."></textarea>
   <button onclick="kopyala()">Kopyala</button>
-  <p id="mesaj" style="text-align:center; color: green;"></p>
+  <p id="mesaj"></p>
 
   <script>
+    function escapeHtml(html) {
+      return html.replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+    }
+
     function uret() {
       const placeId = document.getElementById("placeid").value.trim();
       const insta = document.getElementById("instagram").value.trim();
       const cikti = document.getElementById("cikti");
 
       if (!placeId || !insta) {
-        cikti.value = "Lütfen tüm alanları doldurun.";
+        cikti.value = "Lütfen her iki alanı da doldurun.";
         return;
       }
 
-      const html = `<!DOCTYPE html>
+      const htmlIcerik = `
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -164,12 +177,7 @@
 
   <script>
     const dogruSifre = "1234";
-    const hediyeler = [
-      "Anahtarlık 🔑",
-      "Çakmak 🔥",
-      "Kalem ✒️",
-      "Not Defteri 📓"
-    ];
+    const hediyeler = ["Anahtarlık 🔑", "Çakmak 🔥", "Kalem ✒️", "Not Defteri 📓"];
     let cevrildi = false;
 
     function kontrolEt() {
@@ -205,15 +213,15 @@
 </body>
 </html>`;
 
-      cikti.value = html;
-      document.getElementById("mesaj").textContent = "";
+      cikti.value = htmlIcerik;
+      document.getElementById("mesaj").textContent = "HTML başarıyla üretildi.";
     }
 
     function kopyala() {
-      const cikti = document.getElementById("cikti");
-      cikti.select();
+      const textArea = document.getElementById("cikti");
+      textArea.select();
       document.execCommand("copy");
-      document.getElementById("mesaj").textContent = "HTML başarıyla panoya kopyalandı!";
+      document.getElementById("mesaj").textContent = "Kopyalandı!";
     }
   </script>
 </body>
