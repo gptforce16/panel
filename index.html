@@ -18,14 +18,16 @@
       box-sizing: border-box;
     }
     textarea {
-      height: 400px;
+      height: 500px;
       white-space: pre;
     }
-    #mesaj { color: green; margin-top: 10px; }
+    #mesaj {
+      margin-top: 10px;
+      color: green;
+    }
   </style>
 </head>
 <body>
-
   <h2>HTML Kod Oluştur</h2>
   <input type="text" id="placeId" placeholder="Google Place ID">
   <input type="text" id="instaUser" placeholder="Instagram Kullanıcı Adı">
@@ -38,13 +40,7 @@
     function uret() {
       const placeId = document.getElementById("placeId").value.trim();
       const insta = document.getElementById("instaUser").value.trim();
-
-      if (!placeId || !insta) {
-        alert("Lütfen her iki alanı da doldurun.");
-        return;
-      }
-
-      const kod = `<!DOCTYPE html>
+      const html = `<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -172,15 +168,15 @@
 </body>
 </html>`;
 
-      document.getElementById("cikti").value = kod;
-      document.getElementById("mesaj").textContent = "";
+      document.getElementById("cikti").value = html;
+      document.getElementById("mesaj").textContent = "HTML başarıyla oluşturuldu!";
     }
 
     function kopyala() {
       const text = document.getElementById("cikti");
       text.select();
       document.execCommand("copy");
-      document.getElementById("mesaj").textContent = "HTML panoya kopyalandı!";
+      document.getElementById("mesaj").textContent = "Kod panoya kopyalandı!";
     }
   </script>
 </body>
