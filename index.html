@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTML Oluşturucu</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTML Üretici</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f1f1f1;
+      background: #f0f0f0;
     }
     input, button, textarea {
       width: 100%;
@@ -18,22 +18,19 @@
       box-sizing: border-box;
     }
     textarea {
-      height: 350px;
+      height: 400px;
       white-space: pre;
     }
-    #mesaj {
-      margin-top: 10px;
-      color: green;
-    }
+    #mesaj { color: green; margin-top: 10px; }
   </style>
 </head>
 <body>
 
-  <h2>Google & Instagram Linkli Hediye Çarkı HTML Oluştur</h2>
+  <h2>HTML Kod Oluştur</h2>
   <input type="text" id="placeId" placeholder="Google Place ID">
-  <input type="text" id="instaUser" placeholder="Instagram kullanıcı adı">
+  <input type="text" id="instaUser" placeholder="Instagram Kullanıcı Adı">
   <button onclick="uret()">HTML Oluştur</button>
-  <textarea id="cikti" readonly>HTML kodu burada görünecek...</textarea>
+  <textarea id="cikti" readonly></textarea>
   <button onclick="kopyala()">Kopyala</button>
   <div id="mesaj"></div>
 
@@ -41,12 +38,13 @@
     function uret() {
       const placeId = document.getElementById("placeId").value.trim();
       const insta = document.getElementById("instaUser").value.trim();
+
       if (!placeId || !insta) {
         alert("Lütfen her iki alanı da doldurun.");
         return;
       }
 
-      const html = `<!DOCTYPE html>
+      const kod = `<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -126,10 +124,8 @@
     </a>
   </p>
   <p>
-    <a href="instagram://user?username=${insta}"
-       onclick="window.location='https://instagram.com/${insta}'"
-       style="font-weight: bold; color: #E1306C;">
-       👉 Instagram Sayfamızı Takip Et
+    <a href="instagram://user?username=${insta}" onclick="window.location='https://instagram.com/${insta}'" style="font-weight: bold; color: #E1306C;">
+      👉 Instagram Sayfamızı Takip Et
     </a>
   </p>
   <h3>Şifreyi gir:</h3>
@@ -176,15 +172,15 @@
 </body>
 </html>`;
 
-      document.getElementById("cikti").value = html;
+      document.getElementById("cikti").value = kod;
       document.getElementById("mesaj").textContent = "";
     }
 
     function kopyala() {
-      const c = document.getElementById("cikti");
-      c.select();
+      const text = document.getElementById("cikti");
+      text.select();
       document.execCommand("copy");
-      document.getElementById("mesaj").textContent = "HTML başarıyla panoya kopyalandı!";
+      document.getElementById("mesaj").textContent = "HTML panoya kopyalandı!";
     }
   </script>
 </body>
