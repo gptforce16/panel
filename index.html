@@ -2,134 +2,99 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hediye Çarkı HTML Üretici</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTML Üretici</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
       padding: 20px;
     }
 
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-
-    label {
-      margin-top: 15px;
-      font-weight: bold;
-      display: block;
-    }
-
     input, button, textarea {
+      display: block;
       width: 100%;
-      padding: 12px;
+      max-width: 500px;
+      margin: 10px auto;
+      padding: 10px;
       font-size: 16px;
-      margin-top: 8px;
-      box-sizing: border-box;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      margin-top: 16px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #copyBtn {
-      background-color: #28a745;
-    }
-
-    #copyBtn:hover {
-      background-color: #1e7e34;
     }
 
     textarea {
-      height: 350px;
-      margin-top: 20px;
-      resize: vertical;
+      height: 300px;
     }
 
-    @media (max-width: 600px) {
-      h2 {
-        font-size: 1.4rem;
-      }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
 
-      input, button, textarea {
-        font-size: 15px;
-      }
+    button:hover {
+      background: #0056b3;
+    }
+
+    label {
+      margin-top: 20px;
+      display: block;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h2>Hediye Çarkı HTML Üretici</h2>
+  <h2 style="text-align:center;">Hediye Çarkı HTML Üretici</h2>
 
-  <label for="placeid">Google Place ID:</label>
-  <input type="text" id="placeid" placeholder="Örn: ChIJaSn0O7o-yhQRjjiw9hjH4vk">
+  <label for="placeid">Google Place ID</label>
+  <input type="text" id="placeid" placeholder="Örn: ChIJaSn0O7o-yhQRjjiw9hjH4vk" />
 
-  <label for="instagram">Instagram Kullanıcı Adı:</label>
-  <input type="text" id="instagram" placeholder="Örn: manco.caferestoran">
+  <label for="instagram">Instagram Kullanıcı Adı</label>
+  <input type="text" id="instagram" placeholder="Örn: manco.caferestoran" />
 
-  <button onclick="uretir()">HTML Oluştur</button>
+  <button onclick="uret()">HTML Kodu Üret</button>
 
-  <textarea id="htmlSonuc" readonly placeholder="HTML kodunuz burada görünecek..."></textarea>
-  <button id="copyBtn" onclick="kopyala()">📋 Kodu Kopyala</button>
+  <textarea id="cikti" readonly placeholder="HTML kodu burada görünecek..."></textarea>
+  <button onclick="kopyala()">Kopyala</button>
+  <p id="mesaj" class="success"></p>
 
   <script>
-    function uretir() {
-      const placeid = document.getElementById('placeid').value.trim();
-      const ig = document.getElementById('instagram').value.trim();
+    function uret() {
+      const placeId = document.getElementById("placeid").value.trim();
+      const insta = document.getElementById("instagram").value.trim();
+      const cikti = document.getElementById("cikti");
 
-      if (!placeid || !ig) {
-        alert("Lütfen her iki alanı da doldurun.");
+      if (!placeId || !insta) {
+        cikti.value = "Lütfen her iki alanı da doldurun.";
         return;
       }
 
-      const htmlKod = `<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hediye Çarkı</title>
-</head>
-<body>
-  <h1>Hediye Çarkına Hoş Geldin</h1>
+      const html = `
+<a id="googleYorumLink" href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">
+  👉 Google Yorum Sayfasına Git
+</a>
 
-  <p>
-    <a href="https://search.google.com/local/writereview?placeid=${placeid}" target="_blank">
-      👉 Google Yorum Sayfasına Git
-    </a>
-  </p>
+<a id="instagramLink" href="instagram://user?username=${insta}" 
+   onclick="window.location='https://instagram.com/${insta}'" 
+   style="font-weight: bold; color: #E1306C;">
+   👉 Instagram Sayfamızı Takip Et
+</a>
+      `.trim();
 
-  <p>
-    <a href="instagram://user?username=${ig}" 
-       onclick="window.location='https://instagram.com/${ig}'" 
-       style="font-weight: bold; color: #E1306C;">
-       👉 Instagram Sayfamızı Takip Et
-    </a>
-  </p>
-</body>
-</html>`;
-
-      document.getElementById('htmlSonuc').value = htmlKod;
+      cikti.value = html;
+      document.getElementById("mesaj").textContent = "";
     }
 
     function kopyala() {
-      const textarea = document.getElementById('htmlSonuc');
-      textarea.select();
-      textarea.setSelectionRange(0, 99999); // Mobil uyumlu kopyalama
+      const cikti = document.getElementById("cikti");
+      cikti.select();
       document.execCommand("copy");
-      alert("HTML kodu kopyalandı!");
+      document.getElementById("mesaj").textContent = "HTML panoya kopyalandı!";
     }
   </script>
 </body>
