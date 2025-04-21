@@ -7,7 +7,7 @@
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
     input, button, textarea { width: 100%; margin-top: 10px; padding: 10px; font-size: 16px; }
-    textarea { height: 500px; font-family: monospace; }
+    textarea { height: 500px; font-family: monospace; white-space: pre; }
     #mesaj { margin-top: 10px; color: green; font-weight: bold; }
   </style>
 </head>
@@ -97,7 +97,6 @@
         const sonuc = ["Anahtarlık", "Kalem", "Çakmak", "Not Defteri"];
         const index = Math.floor((derece % 360) / 90);
         document.getElementById("sonuc").innerText = "Tebrikler! Hediyeniz: " + sonuc[index];
-
         confetti({ particleCount: 120, spread: 60, origin: { y: 0.6 } });
       }, 4000);
     }
