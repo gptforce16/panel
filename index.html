@@ -14,7 +14,7 @@
 <body>
   <h2>HTML Üretici</h2>
   <input type="text" id="placeId" placeholder="Google Place ID" />
-  <input type="text" id="insta" placeholder="Instagram Kullanıcı Adı" />
+  <input type="text" id="insta" placeholder="Instagram kullanıcı adı (örnek: isletmeadi)" />
   <button onclick="olustur()">HTML Oluştur</button>
   <textarea id="output" placeholder="HTML burada görünecek..."></textarea>
   <button onclick="kopyala()">Kopyala</button>
@@ -22,8 +22,8 @@
 
   <script>
     function olustur() {
-      const placeId = document.getElementById("placeId").value;
-      const insta = document.getElementById("insta").value;
+      const placeId = document.getElementById("placeId").value.trim();
+      const insta = document.getElementById("insta").value.trim();
 
       const html = `<!DOCTYPE html>
 <html>
@@ -40,7 +40,12 @@
 <body>
   <h2>Çevir Kazan!</h2>
   <a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">Google Yorum Yap</a><br><br>
-  <a href="instagram://user?username=${insta}" onclick="setTimeout(() => { window.open('https://instagram.com/${insta}', '_blank'); }, 500);">Instagram Sayfamızı Takip Et</a><br><br>
+
+  <a href="intent://instagram.com/_u/${insta}#Intent;package=com.instagram.android;scheme=https;end"
+     onclick="setTimeout(() => { window.open('https://instagram.com/${insta}', '_blank'); }, 1000);">
+     Instagram Sayfamızı Takip Et
+  </a><br><br>
+
   <input type="password" id="sifre" placeholder="Şifreyi girin" />
   <button onclick="giris()">Giriş Yap</button>
   <div id="wheel" style="display:none;"></div>
