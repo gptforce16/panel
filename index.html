@@ -3,144 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Yorum ve Hediye Çarkı</title>
+  <title>HTML Üretici</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #ece9e6, #ffffff);
-      color: #333;
-      text-align: center;
-      padding: 30px 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 25px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
-    .btn, input[type="password"] {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
-    }
-
-    input[type="password"] {
-      border: 1px solid #ccc;
-    }
-
-    .btn {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background-color: #0056b3;
-    }
-
-    .link-btn {
-      background-color: #e9ecef;
-      color: #007bff;
-      text-decoration: none;
-      display: block;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 10px 0;
-      font-weight: bold;
-    }
-
-    #wheel-container {
-      position: relative;
-      margin: 30px auto;
-      width: 240px;
-      height: 240px;
-      opacity: 0;
-      transform: scale(0.5);
-      transition: all 1s ease;
-    }
-
-    #pointer {
-      position: absolute;
-      top: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0; 
-      height: 0; 
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 25px solid #ff5722;
-    }
-
-    #wheel {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 6px solid #333;
-      background: conic-gradient(#f44336 0% 25%, #4caf50 25% 50%, #2196f3 50% 75%, #ffeb3b 75% 100%);
-      transition: transform 4s ease-out;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 20px;
-      color: #fff;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    }
-
-    #spinBtn {
-      display: none;
-      margin-top: 15px;
-      background-color: #28a745;
-    }
-
-    #spinBtn:hover {
-      background-color: #218838;
-    }
-
-    #sonuc {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .goster {
-      opacity: 1 !important;
-      transform: scale(1) !important;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    input, button, textarea { width: 100%; margin-top: 10px; padding: 10px; font-size: 16px; }
+    textarea { height: 500px; font-family: monospace; }
+    #mesaj { margin-top: 10px; color: green; font-weight: bold; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Yorum Yap, Çevir Kazan!</h2>
-    <a class="link-btn" href="https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID" target="_blank">Google Yorum Yap</a>
-    <a class="link-btn" href="https://instagram.com/YOUR_INSTA" target="_blank">Instagram Sayfamızı Takip Et</a>
 
-    <input type="password" id="sifre" placeholder="Şifreyi girin" />
-    <button class="btn" onclick="giris()">Giriş Yap</button>
+  <h2>Hediye Çarkı HTML Oluşturucu</h2>
+  <input type="text" id="placeId" placeholder="Google Place ID" />
+  <input type="text" id="insta" placeholder="Instagram Kullanıcı Adı" />
+  <button onclick="olustur()">HTML Oluştur</button>
 
-    <div id="wheel-container">
-      <div id="pointer"></div>
-      <div id="wheel">Çevir</div>
-    </div>
+  <textarea id="output" placeholder="Oluşturulan HTML burada görünecek..."></textarea>
+  <button onclick="kopyala()">Kopyala</button>
+  <p id="mesaj"></p>
 
-    <button class="btn" id="spinBtn" onclick="spin()">Çevir!</button>
-    <p id="sonuc"></p>
+  <script>
+    function olustur() {
+      const placeId = document.getElementById("placeId").value.trim();
+      const insta = document.getElementById("insta").value.trim();
+
+      if (!placeId || !insta) {
+        alert("Lütfen tüm alanları doldurun.");
+        return;
+      }
+
+      const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yorum ve Hediye Çarkı</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; text-align: center; }
+    .btn, input { padding: 10px; font-size: 16px; margin: 10px; border-radius: 8px; }
+    #wheel { width: 200px; height: 200px; margin: 20px auto; border: 6px solid #000; border-radius: 50%; background: conic-gradient(#f00 0% 25%, #0f0 25% 50%, #00f 50% 75%, #ff0 75% 100%); transition: transform 4s ease-out; }
+    #spinBtn { display: none; background-color: #28a745; color: #fff; border: none; }
+    #wheel-container { display: none; }
+    #pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 25px solid red; margin: auto; }
+    #sonuc { font-weight: bold; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h2>Çevir Kazan!</h2>
+  <a href="https://search.google.com/local/writereview?placeid=${placeId}" target="_blank">Google Yorum Yap</a><br>
+  <a href="https://instagram.com/${insta}" target="_blank">Instagram Takip</a><br><br>
+
+  <input type="password" id="sifre" placeholder="Şifreyi girin">
+  <button onclick="giris()">Giriş Yap</button>
+
+  <div id="wheel-container">
+    <div id="pointer"></div>
+    <div id="wheel"></div>
   </div>
+  <button id="spinBtn" onclick="spin()">Çevir!</button>
+
+  <p id="sonuc"></p>
 
   <audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7e3d6ef9ac.mp3?filename=wheel-tick-1.mp3" preload="auto"></audio>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -152,9 +75,8 @@
     function giris() {
       const girilen = document.getElementById("sifre").value;
       if (girilen === dogruSifre) {
-        const wheelContainer = document.getElementById("wheel-container");
-        wheelContainer.classList.add("goster");
-        document.getElementById("spinBtn").style.display = "block";
+        document.getElementById("wheel-container").style.display = "block";
+        document.getElementById("spinBtn").style.display = "inline-block";
       } else {
         alert("Şifre yanlış!");
       }
@@ -165,9 +87,8 @@
       dondu = true;
       const derece = Math.floor(Math.random() * 360) + 720;
       const wheel = document.getElementById("wheel");
-      const clickSound = document.getElementById("clickSound");
-
-      let interval = setInterval(() => clickSound.play(), 130);
+      const sound = document.getElementById("clickSound");
+      let interval = setInterval(() => sound.play(), 130);
 
       wheel.style.transform = "rotate(" + derece + "deg)";
 
@@ -177,14 +98,25 @@
         const index = Math.floor((derece % 360) / 90);
         document.getElementById("sonuc").innerText = "Tebrikler! Hediyeniz: " + sonuc[index];
 
-        // Konfeti patlat!
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
+        confetti({ particleCount: 120, spread: 60, origin: { y: 0.6 } });
       }, 4000);
     }
   </script>
+
+</body>
+</html>`;
+
+      document.getElementById("output").value = html;
+      document.getElementById("mesaj").textContent = "HTML başarıyla oluşturuldu!";
+    }
+
+    function kopyala() {
+      const textArea = document.getElementById("output");
+      textArea.select();
+      document.execCommand("copy");
+      document.getElementById("mesaj").textContent = "Kod panoya kopyalandı!";
+    }
+  </script>
+
 </body>
 </html>
