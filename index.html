@@ -15,15 +15,49 @@
   <h2>HTML Üretici</h2>
   <input type="text" id="placeId" placeholder="Google Place ID" />
   <input type="text" id="insta" placeholder="Instagram kullanıcı adı (örnek: isletmeadi)" />
+  
+  <h3>Hediyeler ve Yüzdeleri</h3>
+  <div id="hediyeListesi">
+    <input placeholder="Hediye Adı" class="hediye" />
+    <input placeholder="Yüzde (%)" type="number" class="yuzde" />
+  </div>
+  <button onclick="hediyeEkle()">+ Hediye Ekle</button>
+
   <button onclick="olustur()">HTML Oluştur</button>
   <textarea id="output" placeholder="HTML burada görünecek..."></textarea>
   <button onclick="kopyala()">Kopyala</button>
   <p id="mesaj"></p>
 
   <script>
+    function hediyeEkle() {
+      const container = document.getElementById("hediyeListesi");
+      container.insertAdjacentHTML("beforeend", `
+        <input placeholder="Hediye Adı" class="hediye" />
+        <input placeholder="Yüzde (%)" type="number" class="yuzde" />
+      `);
+    }
+
     function olustur() {
       const placeId = document.getElementById("placeId").value.trim();
       const insta = document.getElementById("insta").value.trim();
+      const hediyeAdlari = [...document.querySelectorAll(".hediye")].map(i => i.value.trim());
+      const yuzdeler = [...document.querySelectorAll(".yuzde")].map(i => Number(i.value.trim()));
+
+      if (hediyeAdlari.length !== yuzdeler.length || yuzdeler.some(i => isNaN(i) || i <= 0) || yuzdeler.reduce((a, b) => a + b, 0) !== 100) {
+        alert("Lütfen tüm hediye adlarını ve yüzdeleri doğru girin. Toplam yüzde 100 olmalı.");
+        return;
+      }
+
+      const renkler = ["#f00", "#0f0", "#00f", "#ff0", "#0ff", "#f0f", "#888", "#fa0"];
+      let gradient = "";
+      let start = 0;
+      for (let i = 0; i < yuzdeler.length; i++) {
+        const end = start + yuzdeler[i];
+        gradient += `${renkler[i % renkler.length]} ${start}% ${end}%, `;
+        start = end;
+      }
+      gradient = gradient.slice(0, -2);
+      const sonucJSON = JSON.stringify(hediyeAdlari);
 
       const html = `<!DOCTYPE html>
 <html>
@@ -33,7 +67,7 @@
   <title>Yorum Karşılığı Hediye</title>
   <style>
     body { text-align: center; font-family: sans-serif; padding: 20px; }
-    #wheel { width: 200px; height: 200px; border: 5px solid #000; border-radius: 50%; margin: 20px auto; transition: transform 4s ease-out; background: conic-gradient(#f00 0% 25%, #0f0 25% 50%, #00f 50% 75%, #ff0 75% 100%); }
+    #wheel { width: 200px; height: 200px; border: 5px solid #000; border-radius: 50%; margin: 20px auto; transition: transform 4s ease-out; background: conic-gradient(${gradient}); }
     #spinBtn { padding: 10px 20px; font-size: 18px; }
   </style>
 </head>
@@ -72,9 +106,17 @@
       const derece = Math.floor(Math.random() * 360) + 720;
       document.getElementById("wheel").style.transform = "rotate(" + derece + "deg)";
       setTimeout(() => {
-        const sonuc = ["Anahtarlık", "Kalem", "Çakmak", "Not Defteri"];
-        const index = Math.floor((derece % 360) / 90);
-        document.getElementById("sonuc").innerText = "Tebrikler! Hediyeniz: " + sonuc[index];
+        const yuzdeler = ${JSON.stringify(yuzdeler)};
+        const hediyeler = ${sonucJSON};
+        let aci = derece % 360;
+        let toplam = 0;
+        for (let i = 0; i < yuzdeler.length; i++) {
+          toplam += (yuzdeler[i] / 100) * 360;
+          if (aci <= toplam) {
+            document.getElementById("sonuc").innerText = "Tebrikler! Hediyeniz: " + hediyeler[i];
+            break;
+          }
+        }
       }, 4000);
     }
   <\/script>
