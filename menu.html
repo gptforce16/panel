@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menü</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .kategori {
+      margin-top: 30px;
+    }
+
+    .urun {
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+    }
+
+    .baslik {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .icerik {
+      color: #555;
+      margin: 5px 0;
+    }
+
+    .fiyat {
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Menü</h1>
+  <div id="menu"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function menuYukle() {
+      const { data: menu, error } = await supabase
+        .from('menu')
+        .select('*')
+        .order('kategori', { ascending: true });
+
+      if (error) {
+        document.getElementById('menu').innerText = 'Menü yüklenemedi.';
+        console.error(error);
+        return;
+      }
+
+      const kategoriler = {};
+
+      menu.forEach(item => {
+        if (!kategoriler[item.kategori]) {
+          kategoriler[item.kategori] = [];
+        }
+        kategoriler[item.kategori].push(item);
+      });
+
+      const menuDiv = document.getElementById('menu');
+      menuDiv.innerHTML = '';
+
+      for (const kategori in kategoriler) {
+        const katDiv = document.createElement('div');
+        katDiv.className = 'kategori';
+
+        const title = document.createElement('h2');
+        title.innerText = kategori;
+        katDiv.appendChild(title);
+
+        kategoriler[kategori].forEach(item => {
+          const urun = document.createElement('div');
+          urun.className = 'urun';
+
+          urun.innerHTML = `
+            <div class="baslik">${item.baslik}</div>
+            <div class="icerik">${item.icerik}</div>
+            <div class="fiyat">${item.fiyat} TL</div>
+          `;
+
+          katDiv.appendChild(urun);
+        });
+
+        menuDiv.appendChild(katDiv);
+      }
+    }
+
+    menuYukle();
+  </script>
+</body>
+</html>
