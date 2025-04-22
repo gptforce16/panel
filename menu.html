@@ -2,99 +2,64 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Menü</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
     }
-
-    .kategori {
-      margin-top: 30px;
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
     }
-
     .urun {
-      border-bottom: 1px solid #ccc;
-      padding: 10px 0;
+      background: #f5f5f5;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
     }
-
-    .baslik {
-      font-weight: bold;
-      font-size: 18px;
+    .urun h3 {
+      margin: 0 0 5px;
     }
-
-    .icerik {
-      color: #555;
-      margin: 5px 0;
-    }
-
     .fiyat {
-      color: #000;
+      color: #d40000;
       font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h1>Menü</h1>
-  <div id="menu"></div>
+  <div id="menu">Yükleniyor...</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script>
-    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    async function menuYukle() {
-      const { data: menu, error } = await supabase
-        .from('menu')
-        .select('*')
-        .order('kategori', { ascending: true });
+    const supabaseUrl = "https://qcrbbvokdkyjjfsgffau.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo";
 
-      if (error) {
-        document.getElementById('menu').innerText = 'Menü yüklenemedi.';
-        console.error(error);
-        return;
-      }
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-      const kategoriler = {};
+    const { data, error } = await supabase.from("menu").select("*");
 
-      menu.forEach(item => {
-        if (!kategoriler[item.kategori]) {
-          kategoriler[item.kategori] = [];
-        }
-        kategoriler[item.kategori].push(item);
+    const menuDiv = document.getElementById("menu");
+    menuDiv.innerHTML = "";
+
+    if (error) {
+      menuDiv.innerText = "Veriler yüklenemedi.";
+      console.error(error);
+    } else {
+      data.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "urun";
+        div.innerHTML = `
+          <h3>${item.baslik}</h3>
+          <p>${item.icerik}</p>
+          <p class="fiyat">₺${item.fiyat}</p>
+        `;
+        menuDiv.appendChild(div);
       });
-
-      const menuDiv = document.getElementById('menu');
-      menuDiv.innerHTML = '';
-
-      for (const kategori in kategoriler) {
-        const katDiv = document.createElement('div');
-        katDiv.className = 'kategori';
-
-        const title = document.createElement('h2');
-        title.innerText = kategori;
-        katDiv.appendChild(title);
-
-        kategoriler[kategori].forEach(item => {
-          const urun = document.createElement('div');
-          urun.className = 'urun';
-
-          urun.innerHTML = `
-            <div class="baslik">${item.baslik}</div>
-            <div class="icerik">${item.icerik}</div>
-            <div class="fiyat">${item.fiyat} TL</div>
-          `;
-
-          katDiv.appendChild(urun);
-        });
-
-        menuDiv.appendChild(katDiv);
-      }
     }
-
-    menuYukle();
   </script>
 </body>
 </html>
