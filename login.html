@@ -1,54 +1,41 @@
-<!-- login.html --><!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giriş Yap</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 2rem; }
-    input, button { margin: 0.5rem; padding: 0.5rem; }
-  </style>
 </head>
 <body>
-  <h2>İşletme Girişi</h2>
-  <input type="text" id="kullaniciAdi" placeholder="Kullanıcı Adı" /> <br />
-  <input type="password" id="sifre" placeholder="Şifre" /> <br />
-  <button onclick="girisYap()">Giriş Yap</button>  <script>
-    const supabase = supabase.createClient(
-      'https://qcrbbvokdkyjjfsgffau.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    );
+  <h2>Giriş Yap</h2>
+  <input type="text" id="kullaniciAdi" placeholder="Kullanıcı Adı">
+  <input type="password" id="sifre" placeholder="Şifre">
+  <button onclick="girisYap()">Giriş</button>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+    const supabaseUrl = "https://qcrbbvokdkyjjfsgffau.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo";
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     async function girisYap() {
-      const kullaniciAdi = document.getElementById('kullaniciAdi').value;
-      const sifre = document.getElementById('sifre').value;
+      const kullaniciAdi = document.getElementById("kullaniciAdi").value;
+      const sifre = document.getElementById("sifre").value;
 
       const { data, error } = await supabase
-        .from('kullanicilar')
-        .select('*')
-        .eq('kullanici_adi', kullaniciAdi)
-        .eq('sifre', sifre)
+        .from("kullanicilar")
+        .select("*")
+        .eq("kullanici_adi", kullaniciAdi)
+        .eq("sifre", sifre)
         .single();
 
-      if (error || !data) {
-        alert('Giriş başarısız!');
+      if (data) {
+        sessionStorage.setItem("girisYapildi", "true");
+        sessionStorage.setItem("isletme_id", data.isletme_id);
+        window.location.href = "admin.html";
       } else {
-        localStorage.setItem('isletme_id', data.isletme_id);
-        window.location.href = 'admin.html';
+        alert("Kullanıcı adı veya şifre yanlış!");
       }
     }
-  </script></body>
-</html><!-- admin.html güncellemesi --><!-- Dosya başında giriş kontrolü eklenmeli --><script>
-  const isletmeId = localStorage.getItem('isletme_id');
-  if (!isletmeId) {
-    alert("Giriş yapmanız gerekiyor!");
-    window.location.href = "login.html";
-  }
-</script><!-- Çıkış butonu ekle --><button onclick="cikisYap()">Çıkış Yap</button>
-
-<script>
-  function cikisYap() {
-    localStorage.clear();
-    window.location.href = "login.html";
-  }
-</script>
+  </script>
+</body>
+</html>
