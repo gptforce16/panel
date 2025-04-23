@@ -2,89 +2,82 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Menü Listesi</title>
   <style>
     body {
-      font-family: sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
-    }
-    h2 {
-      text-align: center;
-    }
-    .menu-container {
-      display: grid;
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .menu-card {
-      background: white;
+      font-family: Arial, sans-serif;
       padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin: 0;
     }
-    .menu-card h3 {
-      margin: 0 0 8px;
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
     }
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: white;
-      background-color: green;
+    .menu-item {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
-    .badge.pasif {
-      background-color: gray;
+    .menu-item h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .menu-item p {
+      margin: 4px 0;
+      font-size: 0.95rem;
+    }
+    .menu-item .fiyat {
+      font-weight: bold;
+      margin-top: 6px;
+      color: #27ae60;
     }
   </style>
 </head>
 <body>
-  <h2>Menü</h2>
-  <div id="menu-listesi" class="menu-container"></div>
+  <h1>Menü</h1>
+  <div id="menu-listesi"></div>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
     const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // URL parametresinden işletme ID'sini al
     const urlParams = new URLSearchParams(window.location.search)
-    const isletmeId = urlParams.get('id')
+    const isletme_id = urlParams.get('id') || 'admin'
 
-    const listeAl = async () => {
+    async function getMenu() {
       const { data, error } = await supabase
-        .from('menuler')
+        .from('menu')
         .select('*')
-        .eq('isletme_id', isletmeId)
-        .order('created_at', { ascending: false })
+        .eq('isletme_id', isletme_id)
+        .eq('aktif', true)
+        .order('id', { ascending: true })
 
-      if (error) {
-        alert('Veri alınırken hata oluştu: ' + error.message)
+      const container = document.getElementById('menu-listesi')
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p>Menü bulunamadı.</p>'
         return
       }
 
-      const container = document.getElementById('menu-listesi')
       container.innerHTML = ''
-
       data.forEach(item => {
-        const card = document.createElement('div')
-        card.className = 'menu-card'
-        card.innerHTML = `
-          <h3>${item.baslik}</h3>
-          <p><strong>Kategori:</strong> ${item.kategori}</p>
-          <p><strong>İçerik:</strong> ${item.icerik}</p>
-          <p><strong>Fiyat:</strong> ${item.fiyat} TL</p>
-          <span class="badge ${item.durum ? '' : 'pasif'}">${item.durum ? 'Aktif' : 'Pasif'}</span>
+        container.innerHTML += `
+          <div class="menu-item">
+            <h2>${item.baslik}</h2>
+            <p>${item.kategori}</p>
+            <p>${item.icerik}</p>
+            <p class="fiyat">${item.fiyat} ₺</p>
+          </div>
         `
-        container.appendChild(card)
       })
     }
 
-    listeAl()
+    getMenu()
   </script>
 </body>
 </html>
