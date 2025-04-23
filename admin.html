@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menü Yönetim Paneli</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    .card { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; box-shadow: 0 0 10px #ccc; }
+    input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background-color: #aa1e0e; color: white; border: none; font-weight: bold; }
+    h2 { color: #aa1e0e; text-align: center; }
+    .urun-item { background: #f9f9f9; padding: 8px; margin: 4px 0; border-radius: 5px; }
+    #cikis { background: #555; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Menü Yönetim Paneli</h2>
+  <div class="card">
+    <h3>Yeni Ürün Ekle</h3>
+    <input type="text" id="kategori" placeholder="Kategori" />
+    <input type="text" id="baslik" placeholder="Başlık" />
+    <input type="text" id="icerik" placeholder="İçerik" />
+    <input type="number" id="fiyat" placeholder="Fiyat" />
+    <button onclick="urunEkle()">Ürün Ekle</button>
+    <button id="cikis" onclick="cikisYap()">Çıkış Yap</button>
+    <hr />
+    <h3>Ürünler</h3>
+    <div id="urunler"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    let isletme_id = localStorage.getItem('isletme_id');
+    if (!isletme_id) {
+      alert("Giriş yapmanız gerekiyor!");
+      window.location.href = "login.html";
+    }
+
+    async function urunEkle() {
+      const kategori = document.getElementById('kategori').value;
+      const baslik = document.getElementById('baslik').value;
+      const icerik = document.getElementById('icerik').value;
+      const fiyat = document.getElementById('fiyat').value;
+
+      const { error } = await supabase.from('menu').insert([{
+        kategori, baslik, icerik, fiyat, isletme_id
+      }]);
+
+      if (error) {
+        alert("Ürün eklenemedi!");
+        console.error(error);
+      } else {
+        alert("Ürün eklendi!");
+        urunleriGetir();
+      }
+    }
+
+    async function urunleriGetir() {
+      const { data, error } = await supabase.from('menu').select('*').eq('isletme_id', isletme_id);
+      const urunlerDiv = document.getElementById('urunler');
+      urunlerDiv.innerHTML = '';
+
+      data.forEach(u => {
+        urunlerDiv.innerHTML += `<div class="urun-item">
+          <strong>${u.baslik}</strong><br />
+          ${u.icerik} - <em>${u.fiyat}₺</em> (${u.kategori})
+        </div>`;
+      });
+    }
+
+    function cikisYap() {
+      localStorage.removeItem('isletme_id');
+      window.location.href = "login.html";
+    }
+
+    urunleriGetir();
+  </script>
+</body>
+</html>
