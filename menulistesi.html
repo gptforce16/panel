@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menü Listesi</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background-color: #f0f0f0;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .menu-item {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .kategori {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    .baslik {
+      font-size: 1.2rem;
+      margin: 0.2rem 0;
+      font-weight: bold;
+    }
+    .icerik {
+      color: #555;
+      font-size: 0.95rem;
+    }
+    .fiyat {
+      font-weight: bold;
+      color: #007BFF;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Menü Listesi</h1>
+  <div id="menu-container">Yükleniyor...</div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const params = new URLSearchParams(window.location.search)
+    const isletme_id = params.get('id')
+
+    const container = document.getElementById('menu-container')
+
+    if (!isletme_id) {
+      container.innerHTML = '<p style="color:red;">İşletme bulunamadı.</p>'
+    } else {
+      loadMenu()
+    }
+
+    async function loadMenu() {
+      const { data, error } = await supabase
+        .from('menu')
+        .select('*')
+        .eq('isletme_id', isletme_id)
+        .order('id', { ascending: true })
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="color:gray;">Menü bulunamadı.</p>'
+        return
+      }
+
+      container.innerHTML = ''
+      data.forEach(item => {
+        container.innerHTML += `
+          <div class="menu-item">
+            <div class="kategori">${item.kategori}</div>
+            <div class="baslik">${item.baslik}</div>
+            <div class="icerik">${item.icerik}</div>
+            <div class="fiyat">${item.fiyat} TL</div>
+          </div>`
+      })
+    }
+  </script>
+</body>
+</html>
