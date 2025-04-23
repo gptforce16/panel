@@ -1,142 +1,173 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Paneli</title>
+  <title>Menü Yönetimi</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      padding: 16px;
       margin: 0;
-      padding: 20px;
-      background: #f4f4f4;
+      background: #f9f9f9;
     }
     h1 {
       text-align: center;
+      margin-bottom: 24px;
     }
-    .menu-form {
-      display: grid;
-      gap: 12px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .menu-item {
+    table {
+      width: 100%;
+      border-collapse: collapse;
       background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td {
       padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      align-items: center;
+      border: 1px solid #ddd;
+    }
+    th {
+      background: #f0f0f0;
     }
     input, select {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
       width: 100%;
+      padding: 6px;
     }
-    .btn {
-      padding: 10px 16px;
+    button {
+      padding: 6px 12px;
+      margin: 4px;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
     }
-    .btn-ekle {
-      background: #28a745;
+    .save-btn {
+      background: #27ae60;
       color: white;
     }
-    .btn-kaydet {
-      background: #007bff;
+    .delete-btn {
+      background: #e74c3c;
       color: white;
-      margin-top: 20px;
     }
-    .btn-sil {
-      background: #dc3545;
+    .add-btn {
+      background: #2980b9;
       color: white;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Admin Paneli</h1>
-  <div class="menu-form" id="menu-form"></div>
-  <button class="btn btn-ekle" onclick="yeniUrunEkle()">Yeni Ürün Ekle</button>
-  <button class="btn btn-kaydet" onclick="kaydet()">Kaydet</button>  <script type="module">
+  <h1>Menü Yönetimi</h1>
+  <table id="menu-table">
+    <thead>
+      <tr>
+        <th>Başlık</th>
+        <th>Kategori</th>
+        <th>İçerik</th>
+        <th>Fiyat</th>
+        <th>Aktif</th>
+        <th>İşlem</th>
+      </tr>
+    </thead>
+    <tbody id="menu-body"></tbody>
+  </table>
+
+  <button class="add-btn" onclick="yeniSatirEkle()">+ Yeni Ürün Ekle</button>
+  <button class="save-btn" onclick="kaydet()">Kaydet</button>
+
+  <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    const supabase = createClient(
-      'https://qcrbbvokdkyjjfsgffau.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    )
+    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     const isletme_id = localStorage.getItem('isletme_id') || 'admin'
-    let menuListesi = []
+    const tableBody = document.getElementById('menu-body')
+    let mevcutVeriler = []
 
-    async function getMenu() {
+    async function veriGetir() {
       const { data, error } = await supabase
         .from('menu')
         .select('*')
         .eq('isletme_id', isletme_id)
         .order('id', { ascending: true })
 
-      menuListesi = data || []
-      renderForm()
+      if (error) {
+        alert('Veri alınamadı.')
+        return
+      }
+
+      mevcutVeriler = data
+      tabloyuGuncelle()
     }
 
-    function renderForm() {
-      const form = document.getElementById('menu-form')
-      form.innerHTML = ''
-      menuListesi.forEach((item, index) => {
-        form.innerHTML += `
-          <div class="menu-item">
-            <input type="text" placeholder="Başlık" value="${item.baslik || ''}" onchange="menuListesi[${index}].baslik = this.value" />
-            <input type="text" placeholder="Kategori" value="${item.kategori || ''}" onchange="menuListesi[${index}].kategori = this.value" />
-            <input type="text" placeholder="İçerik" value="${item.icerik || ''}" onchange="menuListesi[${index}].icerik = this.value" />
-            <input type="text" placeholder="Fiyat" value="${item.fiyat || ''}" onchange="menuListesi[${index}].fiyat = this.value" />
-            <select onchange="menuListesi[${index}].aktif = this.value === 'true'">
+    function tabloyuGuncelle() {
+      tableBody.innerHTML = ''
+      mevcutVeriler.forEach((item, index) => {
+        tableBody.innerHTML += `
+          <tr data-id="${item.id}">
+            <td><input type="text" value="${item.baslik}" /></td>
+            <td><input type="text" value="${item.kategori}" /></td>
+            <td><input type="text" value="${item.icerik}" /></td>
+            <td><input type="number" value="${item.fiyat}" /></td>
+            <td><select>
               <option value="true" ${item.aktif ? 'selected' : ''}>Aktif</option>
               <option value="false" ${!item.aktif ? 'selected' : ''}>Pasif</option>
-            </select>
-            <button class="btn btn-sil" onclick="sil(${index})">Sil</button>
-          </div>
+            </select></td>
+            <td><button class="delete-btn" onclick="sil(${item.id})">Sil</button></td>
+          </tr>
         `
       })
     }
 
-    function yeniUrunEkle() {
-      menuListesi.push({ baslik: '', kategori: '', icerik: '', fiyat: '', aktif: true, isletme_id })
-      renderForm()
-    }
-
-    function sil(index) {
-      if (menuListesi[index].id) {
-        supabase.from('menu').delete().eq('id', menuListesi[index].id)
-      }
-      menuListesi.splice(index, 1)
-      renderForm()
+    function yeniSatirEkle() {
+      tableBody.innerHTML += `
+        <tr data-id="yeni">
+          <td><input type="text" placeholder="Başlık" /></td>
+          <td><input type="text" placeholder="Kategori" /></td>
+          <td><input type="text" placeholder="İçerik" /></td>
+          <td><input type="number" placeholder="Fiyat" /></td>
+          <td><select>
+            <option value="true">Aktif</option>
+            <option value="false">Pasif</option>
+          </select></td>
+          <td><button class="delete-btn" onclick="this.closest('tr').remove()">Sil</button></td>
+        </tr>
+      `
     }
 
     async function kaydet() {
-      const yeniKayitlar = menuListesi.filter(item => !item.id && item.baslik)
-      const eskiKayitlar = menuListesi.filter(item => item.id)
+      const satirlar = tableBody.querySelectorAll('tr')
+      for (const tr of satirlar) {
+        const id = tr.getAttribute('data-id')
+        const inputs = tr.querySelectorAll('input, select')
+        const yeniVeri = {
+          baslik: inputs[0].value,
+          kategori: inputs[1].value,
+          icerik: inputs[2].value,
+          fiyat: parseFloat(inputs[3].value),
+          aktif: inputs[4].value === 'true',
+          isletme_id
+        }
 
-      for (let item of eskiKayitlar) {
-        await supabase.from('menu').update({
-          baslik: item.baslik,
-          kategori: item.kategori,
-          icerik: item.icerik,
-          fiyat: item.fiyat,
-          aktif: item.aktif
-        }).eq('id', item.id)
+        if (id === 'yeni') {
+          await supabase.from('menu').insert(yeniVeri)
+        } else {
+          await supabase.from('menu').update(yeniVeri).eq('id', id)
+        }
       }
 
-      for (let item of yeniKayitlar) {
-        await supabase.from('menu').insert(item)
-      }
-
-      await getMenu()
-      alert('Kaydedildi ve menü güncellendi!')
+      alert('Değişiklikler kaydedildi.')
+      location.reload()
     }
 
-    getMenu()
-  </script></body>
+    async function sil(id) {
+      if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+        await supabase.from('menu').delete().eq('id', id)
+        location.reload()
+      }
+    }
+
+    veriGetir()
+  </script>
+</body>
 </html>
