@@ -1,25 +1,92 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Yönetim Paneli</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f3f3f3;
+    }
+    h2 {
+      text-align: center;
+    }
+    .menu-item {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .menu-item strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+    #logout {
+      margin-top: 20px;
+      background: red;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Hoş geldiniz</h2>
-  <button onclick="cikisYap()">Çıkış Yap</button>
+  <h2>Menü Yönetimi</h2>
+  <div id="menu-listesi">Yükleniyor...</div>
+  <button id="logout" onclick="logout()">Çıkış Yap</button>
 
-  <script type="module">
-    if (!sessionStorage.getItem("girisYapildi")) {
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
+  <script>
+    const supabase = supabase.createClient(
+      'https://qcrbbvokdkyjjfsgffau.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    );
+
+    // Giriş kontrolü
+    if (localStorage.getItem('girisYapildi') !== 'true') {
       alert("Giriş yapmanız gerekiyor!");
       window.location.href = "login.html";
     }
 
-    function cikisYap() {
-      sessionStorage.clear();
+    async function menuleriGetir() {
+      const isletmeId = localStorage.getItem("isletme_id");
+      const { data, error } = await supabase
+        .from("menu")
+        .select("*")
+        .eq("isletme_id", isletmeId)
+        .order("created_at", { ascending: false });
+
+      const menuDiv = document.getElementById("menu-listesi");
+
+      if (error || !data || data.length === 0) {
+        menuDiv.innerHTML = "<p>Menü bulunamadı.</p>";
+        return;
+      }
+
+      menuDiv.innerHTML = "";
+      data.forEach(item => {
+        const el = document.createElement("div");
+        el.className = "menu-item";
+        el.innerHTML = `
+          <strong>${item.baslik}</strong>
+          <span>${item.icerik}</span><br>
+          <em>${item.kategori} - ${item.fiyat} ₺</em>
+        `;
+        menuDiv.appendChild(el);
+      });
+    }
+
+    function logout() {
+      localStorage.clear();
       window.location.href = "login.html";
     }
 
-    // Menü verilerini Supabase'ten çekip gösterme kodu buraya eklenebilir.
+    menuleriGetir();
   </script>
 </body>
 </html>
