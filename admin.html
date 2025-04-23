@@ -1,209 +1,161 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menü Yönetimi</title>
+  <title>Admin Panel</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      background: #fff;
+      background: #f1f1f1;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-    }
+    }h1 {
+  text-align: center;
+  margin-bottom: 24px;
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
 
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
+th {
+  background: #007bff;
+  color: white;
+}
 
-    th {
-      background-color: #007bff;
-      color: white;
-    }
+td input[type="text"], td input[type="number"] {
+  width: 100%;
+  padding: 6px;
+  font-size: 14px;
+}
 
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+.toggle {
+  transform: scale(1.3);
+}
 
-    .toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+.btn {
+  background: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+}
 
-    .add-button, .save-button {
-      padding: 10px 20px;
-      background-color: #28a745;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+.btn:hover {
+  background: #218838;
+}
 
-    .save-button {
-      background-color: #007bff;
-      margin-top: 10px;
-      float: right;
-    }
+.btn-delete {
+  background: #dc3545;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
-    .logout {
-      float: right;
-      background-color: #dc3545;
-      margin-left: 10px;
-    }
-
-    @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-
-      th {
-        display: none;
-      }
-
-      td {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-      }
-
-      td:before {
-        content: attr(data-label);
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Menü Yönetimi</h1>
-    <button class="add-button" onclick="yeniUrunEkle()">+ Yeni Ürün</button>
-    <button class="logout" onclick="cikisYap()">Çıkış Yap</button>
-    <table id="menu-table">
-      <thead>
-        <tr>
-          <th>Ürün Adı</th>
-          <th>Fiyat (₺)</th>
-          <th>Durum</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button class="save-button" onclick="degisiklikleriKaydet()">Kaydet</button>
-  </div>
-
-  <script type="module">
+  <h1>Menü Yönetimi</h1>
+  <table id="menu-table">
+    <thead>
+      <tr>
+        <th>Başlık</th>
+        <th>Kategori</th>
+        <th>İçerik</th>
+        <th>Fiyat</th>
+        <th>Aktif</th>
+        <th>Sil</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button class="btn" onclick="saveChanges()">Kaydet</button>  <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
     const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const isletmeId = localStorage.getItem('isletme_id')
-    const tbody = document.querySelector('#menu-table tbody')
+    const isletme_id = localStorage.getItem('isletme_id') || 'admin'
 
-    let urunler = []
-
-    async function veriYukle() {
+    async function loadMenu() {
       const { data, error } = await supabase
         .from('menu')
         .select('*')
-        .eq('isletme_id', isletmeId)
+        .eq('isletme_id', isletme_id)
+        .order('id', { ascending: true })
 
-      if (error) {
-        alert('Veri alınırken hata oluştu.')
-        return
+      if (error) return alert('Veri alınırken hata oluştu.')
+
+      const tbody = document.querySelector('#menu-table tbody')
+      tbody.innerHTML = ''
+
+      data.forEach(item => {
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          <td><input type="text" value="${item.baslik}" data-id="${item.id}" data-field="baslik"></td>
+          <td><input type="text" value="${item.kategori}" data-id="${item.id}" data-field="kategori"></td>
+          <td><input type="text" value="${item.icerik}" data-id="${item.id}" data-field="icerik"></td>
+          <td><input type="number" value="${item.fiyat}" data-id="${item.id}" data-field="fiyat"></td>
+          <td><input type="checkbox" class="toggle" ${item.aktif ? 'checked' : ''} data-id="${item.id}" data-field="aktif"></td>
+          <td><button class="btn-delete" onclick="deleteItem(${item.id})">Sil</button></td>
+        `
+        tbody.appendChild(tr)
+      })
+    }
+
+    async function saveChanges() {
+      const inputs = document.querySelectorAll('input[data-id]')
+      const updates = {}
+
+      inputs.forEach(input => {
+        const id = input.dataset.id
+        const field = input.dataset.field
+        const value = input.type === 'checkbox' ? input.checked : input.value
+
+        if (!updates[id]) updates[id] = { id }
+        updates[id][field] = field === 'fiyat' ? parseFloat(value) : value
+      })
+
+      const updatesArray = Object.values(updates)
+
+      for (const item of updatesArray) {
+        await supabase
+          .from('menu')
+          .update(item)
+          .eq('id', item.id)
       }
 
-      urunler = data
-      tabloyuGuncelle()
+      alert('Değişiklikler kaydedildi ve menü güncellendi.')
+      loadMenu()
     }
 
-    function tabloyuGuncelle() {
-      tbody.innerHTML = ''
-      urunler.forEach((urun, index) => {
-        const row = document.createElement('tr')
+    async function deleteItem(id) {
+      if (!confirm('Bu ürünü silmek istediğinize emin misiniz?')) return
 
-        row.innerHTML = `
-          <td data-label="Ürün Adı">
-            <input type="text" value="${urun.urun_adi}" onchange="urunGuncelle(${index}, 'urun_adi', this.value)">
-          </td>
-          <td data-label="Fiyat">
-            <input type="number" value="${urun.fiyat}" onchange="urunGuncelle(${index}, 'fiyat', this.value)">
-          </td>
-          <td data-label="Durum" class="toggle">
-            <input type="checkbox" ${urun.aktif ? 'checked' : ''} onchange="urunGuncelle(${index}, 'aktif', this.checked)">
-          </td>
-        `
-        tbody.appendChild(row)
-      })
-    }
-
-    function urunGuncelle(index, alan, deger) {
-      urunler[index][alan] = deger
-    }
-
-    function yeniUrunEkle() {
-      urunler.push({
-        urun_adi: '',
-        fiyat: 0,
-        aktif: true,
-        isletme_id: isletmeId
-      })
-      tabloyuGuncelle()
-    }
-
-    async function degisiklikleriKaydet() {
       await supabase
         .from('menu')
         .delete()
-        .eq('isletme_id', isletmeId)
+        .eq('id', id)
 
-      const { error } = await supabase
-        .from('menu')
-        .insert(urunler)
-
-      if (error) {
-        alert('Kaydetme sırasında hata oluştu.')
-      } else {
-        alert('Menü başarıyla kaydedildi.')
-        veriYukle()
-      }
+      loadMenu()
     }
 
-    function cikisYap() {
-      localStorage.removeItem('isletme_id')
-      window.location.href = 'login.html'
-    }
-
-    veriYukle()
-  </script>
-</body>
+    loadMenu()
+  </script></body>
 </html>
