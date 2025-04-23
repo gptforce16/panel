@@ -1,136 +1,152 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yönetim Paneli</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menü Yönetimi</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 20px;
+      padding: 16px;
+      background-color: #f7f7f7;
     }
     h1 {
       text-align: center;
-      color: #333;
+      margin-bottom: 20px;
     }
-    .menu-container {
-      max-width: 800px;
-      margin: 20px auto;
+    .menu-listesi {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     .menu-item {
       background: white;
-      border-radius: 10px;
       padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
     input, select {
       padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      font-size: 1rem;
       width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
-    .buttons {
+    .actions {
       display: flex;
       justify-content: space-between;
-      margin-top: 10px;
+      gap: 10px;
     }
-    button {
+    .actions button {
+      flex: 1;
       padding: 10px;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
       color: white;
       cursor: pointer;
     }
-    .save-btn { background-color: #28a745; }
-    .delete-btn { background-color: #dc3545; }
-    .notification {
+    .sil { background-color: #e74c3c; }
+    .kaydet { background-color: #2ecc71; }
+    .ekle {
+      margin-top: 16px;
+      padding: 10px;
+      width: 100%;
+      background-color: #3498db;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+    }
+    .bildirim {
       text-align: center;
+      margin-top: 16px;
       color: green;
-      margin-top: 20px;
+      display: none;
     }
   </style>
 </head>
 <body>
   <h1>Menü Yönetimi</h1>
-  <div class="menu-container" id="menu-container"></div>
-  <div class="notification" id="notification"></div>  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+  <div class="menu-listesi" id="menuListesi"></div>
+  <button class="ekle" onclick="yeniUrunEkle()">Yeni Ürün Ekle</button>
+  <div class="bildirim" id="bildirim">Değişiklikler kaydedildi.</div>
 
-    const supabase = createClient(
-      'https://qcrbbvokdkyjjfsgffau.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    );
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    const isletme_id = localStorage.getItem('isletme_id');
+    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const isletme_id = localStorage.getItem('isletme_id') || 'admin'
+    const listeDiv = document.getElementById('menuListesi')
+    const bildirim = document.getElementById('bildirim')
+
+    let menuListesi = []
 
     async function getMenu() {
       const { data, error } = await supabase
         .from('menu')
         .select('*')
         .eq('isletme_id', isletme_id)
-        .order('id');
+        .order('id')
 
-      const container = document.getElementById('menu-container');
-      container.innerHTML = '';
-
-      if (data) {
-        data.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'menu-item';
-          div.innerHTML = `
-            <input type="text" value="${item.baslik}" placeholder="Başlık" class="baslik">
-            <input type="text" value="${item.kategori}" placeholder="Kategori" class="kategori">
-            <input type="text" value="${item.icerik}" placeholder="İçerik" class="icerik">
-            <input type="text" value="${item.fiyat}" placeholder="Fiyat" class="fiyat">
-            <select class="aktif">
-              <option value="true" ${item.aktif ? 'selected' : ''}>Aktif</option>
-              <option value="false" ${!item.aktif ? 'selected' : ''}>Pasif</option>
-            </select>
-            <div class="buttons">
-              <button class="save-btn">Kaydet</button>
-              <button class="delete-btn">Sil</button>
-            </div>
-          `;
-
-          const saveBtn = div.querySelector('.save-btn');
-          const deleteBtn = div.querySelector('.delete-btn');
-
-          saveBtn.onclick = async () => {
-            const updated = {
-              baslik: div.querySelector('.baslik').value,
-              kategori: div.querySelector('.kategori').value,
-              icerik: div.querySelector('.icerik').value,
-              fiyat: div.querySelector('.fiyat').value,
-              aktif: div.querySelector('.aktif').value === 'true',
-            };
-            const { error } = await supabase
-              .from('menu')
-              .update(updated)
-              .eq('id', item.id);
-            document.getElementById('notification').textContent = error ? 'Hata oluştu' : 'Kaydedildi';
-          };
-
-          deleteBtn.onclick = async () => {
-            const { error } = await supabase
-              .from('menu')
-              .delete()
-              .eq('id', item.id);
-            if (!error) {
-              div.remove();
-              document.getElementById('notification').textContent = 'Silindi';
-            }
-          };
-
-          container.appendChild(div);
-        });
-      }
+      menuListesi = data || []
+      listeyiGoster()
     }
 
-    getMenu();
-  </script></body>
+    function listeyiGoster() {
+      listeDiv.innerHTML = ''
+      menuListesi.forEach((item, index) => {
+        const urunDiv = document.createElement('div')
+        urunDiv.className = 'menu-item'
+        urunDiv.innerHTML = `
+          <input placeholder="Başlık" value="${item.baslik || ''}" oninput="menuListesi[${index}].baslik=this.value" />
+          <input placeholder="Kategori" value="${item.kategori || ''}" oninput="menuListesi[${index}].kategori=this.value" />
+          <input placeholder="İçerik" value="${item.icerik || ''}" oninput="menuListesi[${index}].icerik=this.value" />
+          <input placeholder="Fiyat" type="number" value="${item.fiyat || ''}" oninput="menuListesi[${index}].fiyat=this.value" />
+          <select onchange="menuListesi[${index}].aktif=this.value==='true'">
+            <option value="true" ${item.aktif ? 'selected' : ''}>Aktif</option>
+            <option value="false" ${!item.aktif ? 'selected' : ''}>Pasif</option>
+          </select>
+          <div class="actions">
+            <button class="sil" onclick="menuListesi.splice(${index},1);listeyiGoster()">Sil</button>
+            <button class="kaydet" onclick="kaydet()">Kaydet</button>
+          </div>
+        `
+        listeDiv.appendChild(urunDiv)
+      })
+    }
+
+    function yeniUrunEkle() {
+      menuListesi.push({
+        baslik: '',
+        kategori: '',
+        icerik: '',
+        fiyat: '',
+        aktif: true,
+        isletme_id: isletme_id
+      })
+      listeyiGoster()
+    }
+
+    async function kaydet() {
+      await supabase.from('menu').delete().eq('isletme_id', isletme_id)
+      for (let item of menuListesi) {
+        await supabase.from('menu').insert([item])
+      }
+      bildirim.style.display = 'block'
+      setTimeout(() => bildirim.style.display = 'none', 2000)
+    }
+
+    getMenu()
+    window.yeniUrunEkle = yeniUrunEkle
+    window.kaydet = kaydet
+    window.menuListesi = menuListesi
+    window.listeyiGoster = listeyiGoster
+  </script>
+</body>
 </html>
