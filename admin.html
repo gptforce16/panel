@@ -1,193 +1,106 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menü Yönetimi</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menü Yönetim Paneli</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabase = supabase.createClient(
+      'https://qcrbbvokdkyjjfsgffau.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    );let isletmeId = localStorage.getItem('isletme_id');
+if (!isletmeId) window.location.href = 'login.html';
 
-    h1, h2 {
-      text-align: center;
-    }
+async function fetchMenu() {
+  const { data } = await supabase.from('menu').select('*').eq('isletme_id', isletmeId);
+  const container = document.getElementById('menu-container');
+  container.innerHTML = '';
+  data.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'grid grid-cols-6 gap-2 p-2 border-b items-center';
+    row.innerHTML = `
+      <input value="${item.kategori}" onchange="updateField('${item.id}', 'kategori', this.value)" />
+      <input value="${item.baslik}" onchange="updateField('${item.id}', 'baslik', this.value)" />
+      <input value="${item.icerik}" onchange="updateField('${item.id}', 'icerik', this.value)" />
+      <input value="${item.fiyat}" onchange="updateField('${item.id}', 'fiyat', this.value)" />
+      <span class="text-sm">${item.durum}</span>
+      <button onclick="toggleDurum('${item.id}', '${item.durum}')" class="text-xs bg-gray-200 px-2 py-1 rounded">Değiştir</button>
+    `;
+    container.appendChild(row);
+  });
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
+async function updateField(id, field, value) {
+  await supabase.from('menu').update({ [field]: value }).eq('id', id);
+}
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
+async function toggleDurum(id, mevcut) {
+  const yeni = mevcut === 'Aktif' ? 'Pasif' : 'Aktif';
+  await supabase.from('menu').update({ durum: yeni }).eq('id', id);
+  fetchMenu();
+}
 
-    input[type="text"], input[type="number"], input[type="password"] {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-    }
+async function yeniUrunEkle() {
+  const kategori = document.getElementById('yeniKategori').value;
+  const baslik = document.getElementById('yeniBaslik').value;
+  const icerik = document.getElementById('yeniIcerik').value;
+  const fiyat = document.getElementById('yeniFiyat').value;
+  await supabase.from('menu').insert({
+    kategori, baslik, icerik, fiyat, durum: 'Aktif', isletme_id: isletmeId
+  });
+  fetchMenu();
+}
 
-    button {
-      padding: 8px 12px;
-      margin: 5px 0;
-      cursor: pointer;
-    }
+async function sifreDegistir() {
+  const mevcut = document.getElementById('mevcutSifre').value;
+  const yeni = document.getElementById('yeniSifre').value;
+  const { data } = await supabase.from('isletmeler').select('*').eq('id', isletmeId).eq('sifre', mevcut);
+  if (data.length > 0) {
+    await supabase.from('isletmeler').update({ sifre: yeni }).eq('id', isletmeId);
+    alert('Şifre güncellendi');
+  } else {
+    alert('Mevcut şifre yanlış');
+  }
+}
 
-    .toggle-btn {
-      padding: 5px 10px;
-      background-color: #eee;
-      border: none;
-      cursor: pointer;
-    }
+function cikisYap() {
+  localStorage.clear();
+  window.location.href = 'login.html';
+}
 
-    .aktif {
-      background-color: #d4edda;
-      color: green;
-    }
+window.onload = fetchMenu;
 
-    .pasif {
-      background-color: #f8d7da;
-      color: red;
-    }
-  </style>
-</head>
-<body>
-  <h1>Menü Yönetim Paneli</h1>
-
-  <table id="menu-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Kategori</th>
-        <th>Başlık</th>
-        <th>İçerik</th>
-        <th>Fiyat</th>
-        <th>Durum</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <h2>Yeni Ürün Ekle</h2>
-  <form id="add-form">
-    <input type="text" id="kategori" placeholder="Kategori" required>
-    <input type="text" id="baslik" placeholder="Başlık" required>
-    <input type="text" id="icerik" placeholder="İçerik" required>
-    <input type="number" id="fiyat" placeholder="Fiyat" required>
-    <button type="submit">Ekle</button>
-  </form>
-
-  <h2>Şifre Değiştir</h2>
-  <form id="password-form">
-    <input type="password" id="old-password" placeholder="Mevcut Şifre" required />
-    <input type="password" id="new-password" placeholder="Yeni Şifre" required />
-    <button type="submit">Şifreyi Değiştir</button>
-  </form>
-
-  <button onclick="logout()">Çıkış Yap</button>
-
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-
-    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    const isletme_id = localStorage.getItem('isletme_id')
-    if (!isletme_id) {
-      window.location.href = 'login.html'
-    }
-
-    async function getMenu() {
-      const { data } = await supabase
-        .from('menu')
-        .select('*')
-        .eq('isletme_id', isletme_id)
-        .order('id', { ascending: true })
-
-      const tbody = document.querySelector('#menu-table tbody')
-      tbody.innerHTML = ''
-
-      data.forEach(item => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${item.id}</td>
-            <td><input value="${item.kategori}" onchange="updateMenu(${item.id}, 'kategori', this.value)"></td>
-            <td><input value="${item.baslik}" onchange="updateMenu(${item.id}, 'baslik', this.value)"></td>
-            <td><input value="${item.icerik}" onchange="updateMenu(${item.id}, 'icerik', this.value)"></td>
-            <td><input type="number" value="${item.fiyat}" onchange="updateMenu(${item.id}, 'fiyat', this.value)"></td>
-            <td>
-              <button class="toggle-btn ${item.aktif ? 'aktif' : 'pasif'}" onclick="toggleAktif(${item.id}, ${item.aktif})">
-                ${item.aktif ? 'Aktif' : 'Pasif'}
-              </button>
-            </td>
-          </tr>`
-      })
-    }
-
-    window.updateMenu = async function(id, field, value) {
-      await supabase.from('menu').update({ [field]: value }).eq('id', id)
-    }
-
-    window.toggleAktif = async function(id, current) {
-      await supabase.from('menu').update({ aktif: !current }).eq('id', id)
-      getMenu()
-    }
-
-    document.getElementById('add-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const kategori = document.getElementById('kategori').value
-      const baslik = document.getElementById('baslik').value
-      const icerik = document.getElementById('icerik').value
-      const fiyat = document.getElementById('fiyat').value
-
-      await supabase.from('menu').insert([{ kategori, baslik, icerik, fiyat, isletme_id, aktif: true }])
-      e.target.reset()
-      getMenu()
-    })
-
-    document.getElementById('password-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const oldPass = document.getElementById('old-password').value
-      const newPass = document.getElementById('new-password').value
-
-      const { data: isletme } = await supabase
-        .from('isletmeler')
-        .select('*')
-        .eq('id', isletme_id)
-        .single()
-
-      if (!isletme || isletme.sifre !== oldPass) {
-        alert('Mevcut şifre yanlış.')
-        return
-      }
-
-      const { error } = await supabase
-        .from('isletmeler')
-        .update({ sifre: newPass })
-        .eq('id', isletme_id)
-
-      if (error) {
-        alert('Şifre değiştirilemedi: ' + error.message)
-      } else {
-        alert('Şifre başarıyla değiştirildi.')
-        e.target.reset()
-      }
-    })
-
-    window.logout = function () {
-      localStorage.removeItem('isletme_id')
-      window.location.href = 'login.html'
-    }
-
-    getMenu()
   </script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="p-4 bg-gray-50 text-gray-800">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Menü Yönetim Paneli</h1>
+    <div class="grid grid-cols-6 font-semibold border-b pb-2 mb-2">
+      <div>Kategori</div>
+      <div>Başlık</div>
+      <div>İçerik</div>
+      <div>Fiyat</div>
+      <div>Durum</div>
+      <div>Değiştir</div>
+    </div>
+    <div id="menu-container"></div><h2 class="mt-8 text-xl font-semibold">Yeni Ürün Ekle</h2>
+<div class="grid grid-cols-4 gap-2 my-2">
+  <input id="yeniKategori" placeholder="Kategori" class="border p-1" />
+  <input id="yeniBaslik" placeholder="Başlık" class="border p-1" />
+  <input id="yeniIcerik" placeholder="İçerik" class="border p-1" />
+  <input id="yeniFiyat" placeholder="Fiyat" class="border p-1" />
+</div>
+<button onclick="yeniUrunEkle()" class="bg-blue-600 text-white px-4 py-1 rounded">Ekle</button>
+
+<h2 class="mt-8 text-xl font-semibold">Şifre Değiştir</h2>
+<div class="grid grid-cols-2 gap-2 my-2">
+  <input id="mevcutSifre" type="password" placeholder="Mevcut Şifre" class="border p-1" />
+  <input id="yeniSifre" type="password" placeholder="Yeni Şifre" class="border p-1" />
+</div>
+<button onclick="sifreDegistir()" class="bg-yellow-500 text-white px-4 py-1 rounded">Şifreyi Değiştir</button>
+<button onclick="cikisYap()" class="bg-red-600 text-white px-4 py-1 rounded ml-2">Çıkış Yap</button>
+
+  </div>
 </body>
 </html>
