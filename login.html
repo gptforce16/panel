@@ -1,91 +1,77 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giriş Yap</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f7f7f7;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       margin: 0;
+      background: #f3f3f3;
     }
     .login-container {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
       width: 100%;
-      max-width: 350px;
+      max-width: 400px;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    input {
+    input, button {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      box-sizing: border-box;
     }
     button {
-      width: 100%;
-      padding: 12px;
-      background-color: #4CAF50;
+      background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    button:hover {
-      background-color: #45a049;
     }
   </style>
 </head>
 <body>
-
   <div class="login-container">
     <h2>Giriş Yap</h2>
-    <form id="login-form">
-      <input type="text" id="username" placeholder="Kullanıcı Adı" required />
-      <input type="password" id="password" placeholder="Şifre" required />
-      <button type="submit">Giriş</button>
-    </form>
+    <input type="text" id="username" placeholder="Kullanıcı Adı" />
+    <input type="password" id="password" placeholder="Şifre" />
+    <button onclick="login()">Giriş Yap</button>
   </div>
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
+  <script>
+    const supabase = supabase.createClient(
+      'https://qcrbbvokdkyjjfsgffau.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    );
 
-    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    document.getElementById('login-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const kullaniciAdi = document.getElementById('username').value;
+    async function login() {
+      const kullanici_adi = document.getElementById('username').value;
       const sifre = document.getElementById('password').value;
 
       const { data, error } = await supabase
-        .from('isletmeler')
+        .from('kullanicilar')
         .select('*')
-        .eq('kullanici_adi', kullaniciAdi)
+        .eq('kullanici_adi', kullanici_adi)
         .eq('sifre', sifre)
         .single();
 
       if (error || !data) {
-        alert('Hatalı kullanıcı adı veya şifre!');
+        alert('Kullanıcı adı veya şifre hatalı!');
       } else {
-        localStorage.setItem('isletme_id', data.id);
+        localStorage.setItem('girisYapildi', 'true');
+        localStorage.setItem('kullanici_id', data.id);
+        localStorage.setItem('isletme_id', data.isletme_id);
         window.location.href = 'admin.html';
       }
-    });
+    }
   </script>
-
 </body>
 </html>
