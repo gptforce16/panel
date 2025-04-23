@@ -1,173 +1,134 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menü Yönetimi</title>
+  <title>Admin Paneli</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 16px;
-      margin: 0;
-      background: #f9f9f9;
+      background: #f8f8f8;
+      padding: 20px;
     }
     h1 {
       text-align: center;
-      margin-bottom: 24px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .menu-list {
+      max-width: 600px;
+      margin: auto;
+    }
+    .menu-item {
       background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 16px;
+      margin-bottom: 12px;
     }
-    th, td {
-      padding: 12px;
-      border: 1px solid #ddd;
-    }
-    th {
-      background: #f0f0f0;
-    }
-    input, select {
+    .menu-item input, .menu-item select {
+      display: block;
       width: 100%;
-      padding: 6px;
-    }
-    button {
-      padding: 6px 12px;
-      margin: 4px;
-      border: none;
+      padding: 8px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
       border-radius: 4px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
     }
-    .save-btn {
-      background: #27ae60;
+    .sil-btn { background: #e74c3c; color: white; }
+    .aktif-btn { background: #2ecc71; color: white; }
+    .pasif-btn { background: #f39c12; color: white; }
+    .ekle-btn { background: #3498db; color: white; }
+    #kaydet-btn {
+      background: #007bff;
       color: white;
-    }
-    .delete-btn {
-      background: #e74c3c;
-      color: white;
-    }
-    .add-btn {
-      background: #2980b9;
-      color: white;
-      margin-top: 10px;
+      padding: 12px;
+      margin: 20px auto;
+      display: block;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 600px;
     }
   </style>
 </head>
 <body>
-  <h1>Menü Yönetimi</h1>
-  <table id="menu-table">
-    <thead>
-      <tr>
-        <th>Başlık</th>
-        <th>Kategori</th>
-        <th>İçerik</th>
-        <th>Fiyat</th>
-        <th>Aktif</th>
-        <th>İşlem</th>
-      </tr>
-    </thead>
-    <tbody id="menu-body"></tbody>
-  </table>
+  <h1>Admin Paneli</h1>
+  <div class="menu-list" id="menu-list"></div>
+  <button id="kaydet-btn">Kaydet</button>  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 
-  <button class="add-btn" onclick="yeniSatirEkle()">+ Yeni Ürün Ekle</button>
-  <button class="save-btn" onclick="kaydet()">Kaydet</button>
+    const supabase = createClient(
+      'https://qcrbbvokdkyjjfsgffau.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    );
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+    const isletme_id = localStorage.getItem('isletme_id') || 'konseptburger';
+    const list = document.getElementById('menu-list');
 
-    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    async function getMenu() {
+      const { data } = await supabase.from('menu').select('*').eq('isletme_id', isletme_id).order('id');
+      list.innerHTML = '';
+      data.forEach(item => renderItem(item));
+      renderItem();
+    }
 
-    const isletme_id = localStorage.getItem('isletme_id') || 'admin'
-    const tableBody = document.getElementById('menu-body')
-    let mevcutVeriler = []
+    function renderItem(item = {}) {
+      const div = document.createElement('div');
+      div.className = 'menu-item';
+      div.innerHTML = `
+        <input type="text" placeholder="Başlık" value="${item.baslik || ''}" />
+        <input type="text" placeholder="Kategori" value="${item.kategori || ''}" />
+        <input type="text" placeholder="İçerik" value="${item.icerik || ''}" />
+        <input type="number" placeholder="Fiyat" value="${item.fiyat || ''}" />
+        <div class="buttons">
+          <button class="sil-btn">Sil</button>
+          <button class="aktif-btn">Aktif</button>
+          <button class="pasif-btn">Pasif</button>
+        </div>
+      `;
+      div.querySelector('.sil-btn').onclick = async () => {
+        if (item.id) await supabase.from('menu').delete().eq('id', item.id);
+        div.remove();
+      };
+      div.querySelector('.aktif-btn').onclick = () => item.aktif = true;
+      div.querySelector('.pasif-btn').onclick = () => item.aktif = false;
+      list.appendChild(div);
+    }
 
-    async function veriGetir() {
-      const { data, error } = await supabase
-        .from('menu')
-        .select('*')
-        .eq('isletme_id', isletme_id)
-        .order('id', { ascending: true })
-
-      if (error) {
-        alert('Veri alınamadı.')
-        return
+    document.getElementById('kaydet-btn').onclick = async () => {
+      const items = [...document.querySelectorAll('.menu-item')];
+      for (let div of items) {
+        const inputs = div.querySelectorAll('input');
+        const baslik = inputs[0].value.trim();
+        const kategori = inputs[1].value.trim();
+        const icerik = inputs[2].value.trim();
+        const fiyat = parseFloat(inputs[3].value);
+        if (!baslik) continue;
+        await supabase.from('menu').upsert({
+          isletme_id,
+          baslik,
+          kategori,
+          icerik,
+          fiyat,
+          aktif: true,
+        });
       }
-
-      mevcutVeriler = data
-      tabloyuGuncelle()
+      alert('Kaydedildi. Sayfa yenileniyor.');
+      location.reload();
     }
 
-    function tabloyuGuncelle() {
-      tableBody.innerHTML = ''
-      mevcutVeriler.forEach((item, index) => {
-        tableBody.innerHTML += `
-          <tr data-id="${item.id}">
-            <td><input type="text" value="${item.baslik}" /></td>
-            <td><input type="text" value="${item.kategori}" /></td>
-            <td><input type="text" value="${item.icerik}" /></td>
-            <td><input type="number" value="${item.fiyat}" /></td>
-            <td><select>
-              <option value="true" ${item.aktif ? 'selected' : ''}>Aktif</option>
-              <option value="false" ${!item.aktif ? 'selected' : ''}>Pasif</option>
-            </select></td>
-            <td><button class="delete-btn" onclick="sil(${item.id})">Sil</button></td>
-          </tr>
-        `
-      })
-    }
-
-    function yeniSatirEkle() {
-      tableBody.innerHTML += `
-        <tr data-id="yeni">
-          <td><input type="text" placeholder="Başlık" /></td>
-          <td><input type="text" placeholder="Kategori" /></td>
-          <td><input type="text" placeholder="İçerik" /></td>
-          <td><input type="number" placeholder="Fiyat" /></td>
-          <td><select>
-            <option value="true">Aktif</option>
-            <option value="false">Pasif</option>
-          </select></td>
-          <td><button class="delete-btn" onclick="this.closest('tr').remove()">Sil</button></td>
-        </tr>
-      `
-    }
-
-    async function kaydet() {
-      const satirlar = tableBody.querySelectorAll('tr')
-      for (const tr of satirlar) {
-        const id = tr.getAttribute('data-id')
-        const inputs = tr.querySelectorAll('input, select')
-        const yeniVeri = {
-          baslik: inputs[0].value,
-          kategori: inputs[1].value,
-          icerik: inputs[2].value,
-          fiyat: parseFloat(inputs[3].value),
-          aktif: inputs[4].value === 'true',
-          isletme_id
-        }
-
-        if (id === 'yeni') {
-          await supabase.from('menu').insert(yeniVeri)
-        } else {
-          await supabase.from('menu').update(yeniVeri).eq('id', id)
-        }
-      }
-
-      alert('Değişiklikler kaydedildi.')
-      location.reload()
-    }
-
-    async function sil(id) {
-      if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
-        await supabase.from('menu').delete().eq('id', id)
-        location.reload()
-      }
-    }
-
-    veriGetir()
-  </script>
-</body>
+    getMenu();
+  </script></body>
 </html>
