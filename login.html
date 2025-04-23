@@ -1,109 +1,54 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!-- login.html --><!DOCTYPE html><html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menü Paneli</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giriş Yap</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f8f8f8; }
-    h1 { color: #333; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    input[type="text"], input[type="number"] { width: 100%; padding: 6px; }
-    button { padding: 8px 12px; margin-top: 10px; cursor: pointer; }
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    input, button { margin: 0.5rem; padding: 0.5rem; }
   </style>
 </head>
 <body>
-  <h1>Menüyü Güncelle</h1>
-  <div id="menu-container"></div>
+  <h2>İşletme Girişi</h2>
+  <input type="text" id="kullaniciAdi" placeholder="Kullanıcı Adı" /> <br />
+  <input type="password" id="sifre" placeholder="Şifre" /> <br />
+  <button onclick="girisYap()">Giriş Yap</button>  <script>
+    const supabase = supabase.createClient(
+      'https://qcrbbvokdkyjjfsgffau.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    );
 
-  <h2>Yeni Ürün Ekle</h2>
-  <form id="add-form">
-    <input type="text" id="kategori" placeholder="Kategori" required />
-    <input type="text" id="baslik" placeholder="Başlık" required />
-    <input type="text" id="icerik" placeholder="İçerik" required />
-    <input type="number" id="fiyat" placeholder="Fiyat" required />
-    <button type="submit">Ekle</button>
-  </form>
+    async function girisYap() {
+      const kullaniciAdi = document.getElementById('kullaniciAdi').value;
+      const sifre = document.getElementById('sifre').value;
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-
-    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    const isletme_id = localStorage.getItem('isletme_id')
-    if (!isletme_id) {
-      alert('Giriş yapmanız gerekiyor!')
-      window.location.href = 'login.html'
-    }
-
-    async function fetchMenu() {
       const { data, error } = await supabase
-        .from('menu')
+        .from('kullanicilar')
         .select('*')
-        .eq('isletme_id', isletme_id)
+        .eq('kullanici_adi', kullaniciAdi)
+        .eq('sifre', sifre)
+        .single();
 
-      const container = document.getElementById('menu-container')
-      container.innerHTML = ''
-
-      if (error) {
-        container.textContent = 'Hata: ' + error.message
-        return
+      if (error || !data) {
+        alert('Giriş başarısız!');
+      } else {
+        localStorage.setItem('isletme_id', data.isletme_id);
+        window.location.href = 'admin.html';
       }
-
-      const table = document.createElement('table')
-      table.innerHTML = `
-        <tr><th>Kategori</th><th>Başlık</th><th>İçerik</th><th>Fiyat</th><th>Güncelle</th><th>Sil</th></tr>
-      `
-      data.forEach(item => {
-        const row = document.createElement('tr')
-        row.innerHTML = `
-          <td><input value="${item.kategori}" id="kat-${item.id}"></td>
-          <td><input value="${item.baslik}" id="bas-${item.id}"></td>
-          <td><input value="${item.icerik}" id="ice-${item.id}"></td>
-          <td><input type="number" value="${item.fiyat}" id="fiy-${item.id}"></td>
-          <td><button onclick="updateItem(${item.id})">Güncelle</button></td>
-          <td><button onclick="deleteItem(${item.id})">Sil</button></td>
-        `
-        table.appendChild(row)
-      })
-
-      container.appendChild(table)
     }
+  </script></body>
+</html><!-- admin.html güncellemesi --><!-- Dosya başında giriş kontrolü eklenmeli --><script>
+  const isletmeId = localStorage.getItem('isletme_id');
+  if (!isletmeId) {
+    alert("Giriş yapmanız gerekiyor!");
+    window.location.href = "login.html";
+  }
+</script><!-- Çıkış butonu ekle --><button onclick="cikisYap()">Çıkış Yap</button>
 
-    window.updateItem = async function (id) {
-      const kategori = document.getElementById(`kat-${id}`).value
-      const baslik = document.getElementById(`bas-${id}`).value
-      const icerik = document.getElementById(`ice-${id}`).value
-      const fiyat = parseFloat(document.getElementById(`fiy-${id}`).value)
-
-      await supabase.from('menu').update({
-        kategori, baslik, icerik, fiyat
-      }).eq('id', id)
-
-      fetchMenu()
-    }
-
-    window.deleteItem = async function (id) {
-      await supabase.from('menu').delete().eq('id', id)
-      fetchMenu()
-    }
-
-    document.getElementById('add-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const kategori = document.getElementById('kategori').value
-      const baslik = document.getElementById('baslik').value
-      const icerik = document.getElementById('icerik').value
-      const fiyat = parseFloat(document.getElementById('fiyat').value)
-
-      await supabase.from('menu').insert([{ kategori, baslik, icerik, fiyat, isletme_id }])
-      e.target.reset()
-      fetchMenu()
-    })
-
-    fetchMenu()
-  </script>
-</body>
-</html>
+<script>
+  function cikisYap() {
+    localStorage.clear();
+    window.location.href = "login.html";
+  }
+</script>
