@@ -3,50 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menü Listesi</title>
+  <title>Menü</title>
   <style>
     body {
-      font-family: sans-serif;
-      padding: 1rem;
-      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
       margin: 0;
+      padding: 10px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
     }
     h1 {
       text-align: center;
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
     }
     .menu-item {
-      background: white;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
     }
-    .kategori {
-      color: #888;
-      font-size: 0.9rem;
+    .menu-item h3 {
+      margin: 0;
+      color: #333;
     }
-    .baslik {
-      font-size: 1.2rem;
-      margin: 0.2rem 0;
+    .menu-item p {
+      margin: 5px 0;
+    }
+    .menu-item span {
       font-weight: bold;
-    }
-    .icerik {
-      color: #555;
-      font-size: 0.95rem;
-    }
-    .fiyat {
-      font-weight: bold;
-      color: #007BFF;
-      margin-top: 0.5rem;
-      font-size: 1rem;
+      color: #007bff;
     }
   </style>
 </head>
 <body>
-  <h1>Menü Listesi</h1>
-  <div id="menu-container">Yükleniyor...</div>
+  <div class="container">
+    <h1>Menü</h1>
+    <div id="menu-list"></div>
+  </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
@@ -58,36 +54,29 @@
     const params = new URLSearchParams(window.location.search)
     const isletme_id = params.get('id')
 
-    const container = document.getElementById('menu-container')
-
     if (!isletme_id) {
-      container.innerHTML = '<p style="color:red;">İşletme bulunamadı.</p>'
+      document.getElementById('menu-list').innerHTML = '<p>İşletme bulunamadı.</p>'
     } else {
-      loadMenu()
-    }
-
-    async function loadMenu() {
       const { data, error } = await supabase
         .from('menu')
         .select('*')
         .eq('isletme_id', isletme_id)
-        .order('id', { ascending: true })
+        .order('kategori', { ascending: true })
 
-      if (error || !data || data.length === 0) {
-        container.innerHTML = '<p style="color:gray;">Menü bulunamadı.</p>'
-        return
+      const container = document.getElementById('menu-list')
+      if (error || data.length === 0) {
+        container.innerHTML = '<p>Menü bulunamadı.</p>'
+      } else {
+        data.forEach(item => {
+          container.innerHTML += `
+            <div class="menu-item">
+              <h3>${item.baslik}</h3>
+              <p><em>${item.kategori}</em></p>
+              <p>${item.icerik}</p>
+              <span>${item.fiyat} ₺</span>
+            </div>`
+        })
       }
-
-      container.innerHTML = ''
-      data.forEach(item => {
-        container.innerHTML += `
-          <div class="menu-item">
-            <div class="kategori">${item.kategori}</div>
-            <div class="baslik">${item.baslik}</div>
-            <div class="icerik">${item.icerik}</div>
-            <div class="fiyat">${item.fiyat} TL</div>
-          </div>`
-      })
     }
   </script>
 </body>
