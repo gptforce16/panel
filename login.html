@@ -2,40 +2,100 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giriş Yap</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f2f2f2;
+    }
+
+    .login-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
+
+<div class="login-container">
   <h2>Giriş Yap</h2>
-  <input type="text" id="kullaniciAdi" placeholder="Kullanıcı Adı">
-  <input type="password" id="sifre" placeholder="Şifre">
+  <input type="text" id="username" placeholder="Kullanıcı Adı">
+  <input type="password" id="password" placeholder="Şifre">
   <button onclick="girisYap()">Giriş</button>
+  <div class="error" id="errorMessage"></div>
+</div>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
+<script>
+  const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo';
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const supabaseUrl = "https://qcrbbvokdkyjjfsgffau.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo";
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  async function girisYap() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorMessage = document.getElementById('errorMessage');
 
-    async function girisYap() {
-      const kullaniciAdi = document.getElementById("kullaniciAdi").value;
-      const sifre = document.getElementById("sifre").value;
+    const { data, error } = await supabase
+      .from('isletmeler')
+      .select('*')
+      .eq('kullanici_adi', username)
+      .eq('sifre', password)
+      .single();
 
-      const { data, error } = await supabase
-        .from("kullanicilar")
-        .select("*")
-        .eq("kullanici_adi", kullaniciAdi)
-        .eq("sifre", sifre)
-        .single();
-
-      if (data) {
-        sessionStorage.setItem("girisYapildi", "true");
-        sessionStorage.setItem("isletme_id", data.isletme_id);
-        window.location.href = "admin.html";
-      } else {
-        alert("Kullanıcı adı veya şifre yanlış!");
-      }
+    if (error || !data) {
+      errorMessage.textContent = 'Kullanıcı adı veya şifre hatalı.';
+    } else {
+      localStorage.setItem('isletme_id', data.id);
+      window.location.href = 'admin.html';
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
