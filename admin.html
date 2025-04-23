@@ -6,108 +6,92 @@
   <title>Menü Yönetimi</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       padding: 20px;
-      margin: 0;
-      background: #f5f5f5;
-    }
-    .container {
-      max-width: 1000px;
+      max-width: 800px;
       margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
+
     h1, h2 {
       text-align: center;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
-    table, th, td {
-      border: 1px solid #ddd;
-    }
+
     th, td {
+      border: 1px solid #ccc;
       padding: 10px;
       text-align: center;
     }
+
     input[type="text"], input[type="number"], input[type="password"] {
-      width: 90%;
-      padding: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
     }
+
     button {
-      padding: 10px;
+      padding: 8px 12px;
       margin: 5px 0;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #0056b3;
+
+    .toggle-btn {
+      padding: 5px 10px;
+      background-color: #eee;
+      border: none;
+      cursor: pointer;
     }
-    form {
-      margin-top: 20px;
+
+    .aktif {
+      background-color: #d4edda;
+      color: green;
     }
-    @media screen and (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      th {
-        display: none;
-      }
-      td {
-        position: relative;
-        padding-left: 50%;
-      }
-      td::before {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        white-space: nowrap;
-        font-weight: bold;
-      }
-      td:nth-of-type(1)::before { content: "ID"; }
-      td:nth-of-type(2)::before { content: "Kategori"; }
-      td:nth-of-type(3)::before { content: "Başlık"; }
-      td:nth-of-type(4)::before { content: "İçerik"; }
-      td:nth-of-type(5)::before { content: "Fiyat"; }
-      td:nth-of-type(6)::before { content: "Güncelle"; }
-      td:nth-of-type(7)::before { content: "Sil"; }
+
+    .pasif {
+      background-color: #f8d7da;
+      color: red;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Menü Yönetim Paneli</h1>
+  <h1>Menü Yönetim Paneli</h1>
 
-    <table id="menu-table"></table>
+  <table id="menu-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Kategori</th>
+        <th>Başlık</th>
+        <th>İçerik</th>
+        <th>Fiyat</th>
+        <th>Durum</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <h2>Yeni Ürün Ekle</h2>
-    <form id="add-form">
-      <input type="text" id="kategori" placeholder="Kategori" required><br>
-      <input type="text" id="baslik" placeholder="Başlık" required><br>
-      <input type="text" id="icerik" placeholder="İçerik" required><br>
-      <input type="number" id="fiyat" placeholder="Fiyat" required><br>
-      <button type="submit">Ekle</button>
-    </form>
+  <h2>Yeni Ürün Ekle</h2>
+  <form id="add-form">
+    <input type="text" id="kategori" placeholder="Kategori" required>
+    <input type="text" id="baslik" placeholder="Başlık" required>
+    <input type="text" id="icerik" placeholder="İçerik" required>
+    <input type="number" id="fiyat" placeholder="Fiyat" required>
+    <button type="submit">Ekle</button>
+  </form>
 
-    <hr>
-    <h2>Şifre Değiştir</h2>
-    <form id="password-form">
-      <input type="password" id="old-password" placeholder="Mevcut Şifre" required /><br>
-      <input type="password" id="new-password" placeholder="Yeni Şifre" required /><br>
-      <button type="submit">Şifreyi Değiştir</button>
-    </form>
+  <h2>Şifre Değiştir</h2>
+  <form id="password-form">
+    <input type="password" id="old-password" placeholder="Mevcut Şifre" required />
+    <input type="password" id="new-password" placeholder="Yeni Şifre" required />
+    <button type="submit">Şifreyi Değiştir</button>
+  </form>
 
-    <button onclick="logout()" style="margin-top: 20px;">Çıkış Yap</button>
-  </div>
+  <button onclick="logout()">Çıkış Yap</button>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
@@ -128,19 +112,22 @@
         .eq('isletme_id', isletme_id)
         .order('id', { ascending: true })
 
-      const table = document.getElementById('menu-table')
-      table.innerHTML = '<tr><th>ID</th><th>Kategori</th><th>Başlık</th><th>İçerik</th><th>Fiyat</th><th>Yenile</th><th>Sil</th></tr>'
+      const tbody = document.querySelector('#menu-table tbody')
+      tbody.innerHTML = ''
 
       data.forEach(item => {
-        table.innerHTML += `
+        tbody.innerHTML += `
           <tr>
             <td>${item.id}</td>
             <td><input value="${item.kategori}" onchange="updateMenu(${item.id}, 'kategori', this.value)"></td>
             <td><input value="${item.baslik}" onchange="updateMenu(${item.id}, 'baslik', this.value)"></td>
             <td><input value="${item.icerik}" onchange="updateMenu(${item.id}, 'icerik', this.value)"></td>
             <td><input type="number" value="${item.fiyat}" onchange="updateMenu(${item.id}, 'fiyat', this.value)"></td>
-            <td><button onclick="getMenu()">Yenile</button></td>
-            <td><button onclick="deleteMenu(${item.id})">Sil</button></td>
+            <td>
+              <button class="toggle-btn ${item.aktif ? 'aktif' : 'pasif'}" onclick="toggleAktif(${item.id}, ${item.aktif})">
+                ${item.aktif ? 'Aktif' : 'Pasif'}
+              </button>
+            </td>
           </tr>`
       })
     }
@@ -149,8 +136,8 @@
       await supabase.from('menu').update({ [field]: value }).eq('id', id)
     }
 
-    window.deleteMenu = async function(id) {
-      await supabase.from('menu').delete().eq('id', id)
+    window.toggleAktif = async function(id, current) {
+      await supabase.from('menu').update({ aktif: !current }).eq('id', id)
       getMenu()
     }
 
@@ -161,15 +148,10 @@
       const icerik = document.getElementById('icerik').value
       const fiyat = document.getElementById('fiyat').value
 
-      await supabase.from('menu').insert([{ kategori, baslik, icerik, fiyat, isletme_id }])
+      await supabase.from('menu').insert([{ kategori, baslik, icerik, fiyat, isletme_id, aktif: true }])
       e.target.reset()
       getMenu()
     })
-
-    window.logout = function () {
-      localStorage.removeItem('isletme_id')
-      window.location.href = 'login.html'
-    }
 
     document.getElementById('password-form').addEventListener('submit', async (e) => {
       e.preventDefault()
@@ -196,9 +178,14 @@
         alert('Şifre değiştirilemedi: ' + error.message)
       } else {
         alert('Şifre başarıyla değiştirildi.')
-        document.getElementById('password-form').reset()
+        e.target.reset()
       }
     })
+
+    window.logout = function () {
+      localStorage.removeItem('isletme_id')
+      window.location.href = 'login.html'
+    }
 
     getMenu()
   </script>
