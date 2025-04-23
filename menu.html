@@ -4,11 +4,78 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Menü Yönetimi</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1, h2 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    table {
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    table th, table td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    td input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    hr {
+      margin: 30px 0;
+    }
+
+    .center-btn {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
   <h1>Menü Yönetim Paneli</h1>
 
-  <table border="1" id="menu-table"></table>
+  <div style="overflow-x: auto;">
+    <table id="menu-table"></table>
+  </div>
 
   <h2>Yeni Ürün Ekle</h2>
   <form id="add-form">
@@ -27,7 +94,9 @@
     <button type="submit">Şifreyi Değiştir</button>
   </form>
 
-  <button onclick="logout()" style="margin-top: 20px;">Çıkış Yap</button>
+  <div class="center-btn">
+    <button onclick="logout()" style="margin-top: 20px;">Çıkış Yap</button>
+  </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
@@ -49,18 +118,18 @@
         .order('id', { ascending: true })
 
       const table = document.getElementById('menu-table')
-      table.innerHTML = '<tr><th>ID</th><th>Kategori</th><th>Başlık</th><th>İçerik</th><th>Fiyat</th><th>Güncelle</th><th>Sil</th></tr>'
+      table.innerHTML = '<tr><th>ID</th><th>Kategori</th><th>Başlık</th><th>İçerik</th><th>Fiyat</th><th>Yenile</th><th>Sil</th></tr>'
 
       data.forEach(item => {
         table.innerHTML += `
           <tr>
             <td>${item.id}</td>
-            <td><input value="${item.kategori}" onchange="updateMenu(${item.id}, 'kategori', this.value)"></td>
-            <td><input value="${item.baslik}" onchange="updateMenu(${item.id}, 'baslik', this.value)"></td>
-            <td><input value="${item.icerik}" onchange="updateMenu(${item.id}, 'icerik', this.value)"></td>
-            <td><input type="number" value="${item.fiyat}" onchange="updateMenu(${item.id}, 'fiyat', this.value)"></td>
+            <td><input value="${item.kategori}" onchange="updateMenu('${item.id}', 'kategori', this.value)"></td>
+            <td><input value="${item.baslik}" onchange="updateMenu('${item.id}', 'baslik', this.value)"></td>
+            <td><input value="${item.icerik}" onchange="updateMenu('${item.id}', 'icerik', this.value)"></td>
+            <td><input type="number" value="${item.fiyat}" onchange="updateMenu('${item.id}', 'fiyat', this.value)"></td>
             <td><button onclick="getMenu()">Yenile</button></td>
-            <td><button onclick="deleteMenu(${item.id})">Sil</button></td>
+            <td><button onclick="deleteMenu('${item.id}')">Sil</button></td>
           </tr>`
       })
     }
