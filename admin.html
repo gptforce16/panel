@@ -1,123 +1,209 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel</title>
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-const kullanici = localStorage.getItem('kullanici');
-if (!kullanici) window.location.href = 'index.html';
-
-const menuList = document.getElementById('menu-list');
-const kategoriInput = document.getElementById('kategori');
-const baslikInput = document.getElementById('baslik');
-const icerikInput = document.getElementById('icerik');
-const fiyatInput = document.getElementById('fiyat');
-const ekleBtn = document.getElementById('ekleBtn');
-const kaydetBtn = document.getElementById('kaydetBtn');
-
-async function listele() {
-  const { data } = await supabase.from('menuler').select('*');
-  menuList.innerHTML = '';
-  data.forEach(item => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td><input value="${item.kategori}" /></td>
-      <td><input value="${item.baslik}" /></td>
-      <td><input value="${item.icerik}" /></td>
-      <td><input value="${item.fiyat}" /></td>
-      <td><input type="checkbox" class="aktif-checkbox" data-id="${item.id}" ${item.durum ? 'checked' : ''}></td>
-    `;
-    menuList.appendChild(row);
-  });
-}
-
-ekleBtn.addEventListener('click', async () => {
-  const yeniUrun = {
-    kategori: kategoriInput.value,
-    baslik: baslikInput.value,
-    icerik: icerikInput.value,
-    fiyat: parseInt(fiyatInput.value),
-    durum: true,
-  };
-
-  const { error } = await supabase.from('menuler').insert([yeniUrun]);
-  if (error) {
-    alert('Ekleme başarısız: ' + error.message);
-  } else {
-    alert('Ürün eklendi');
-    listele();
-  }
-});
-
-kaydetBtn.addEventListener('click', async () => {
-  const checkboxes = document.querySelectorAll('.aktif-checkbox');
-  let hata = 0;
-  for (const cb of checkboxes) {
-    const { error } = await supabase.from('menuler').update({ durum: cb.checked }).eq('id', cb.dataset.id);
-    if (error) hata++;
-  }
-  hata === 0 ? alert('Kaydedildi') : alert('Bazı kayıtlar güncellenemedi');
-  listele();
-});
-
-listele();
-
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menü Yönetimi</title>
   <style>
     body {
-      font-family: Arial;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
     }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 20px;
     }
+
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
     }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
     input[type="text"], input[type="number"] {
       width: 100%;
-      padding: 6px;
-    }
-    button {
-      padding: 10px 15px;
-      border: none;
-      background: #007bff;
-      color: white;
+      padding: 8px;
       border-radius: 6px;
-      margin-top: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .add-button, .save-button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
+    }
+
+    .save-button {
+      background-color: #007bff;
+      margin-top: 10px;
+      float: right;
+    }
+
+    .logout {
+      float: right;
+      background-color: #dc3545;
+      margin-left: 10px;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      th {
+        display: none;
+      }
+
+      td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+      }
     }
   </style>
 </head>
 <body>
-  <h2>Menü Yönetimi</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Kategori</th>
-        <th>Başlık</th>
-        <th>İçerik</th>
-        <th>Fiyat</th>
-        <th>Aktif</th>
-      </tr>
-    </thead>
-    <tbody id="menu-list"></tbody>
-  </table>
-  <button id="kaydetBtn">Değişiklikleri Kaydet</button>  <h3>Yeni Ürün Ekle</h3>
-  <input type="text" id="kategori" placeholder="Kategori" />
-  <input type="text" id="baslik" placeholder="Başlık" />
-  <input type="text" id="icerik" placeholder="İçerik" />
-  <input type="number" id="fiyat" placeholder="Fiyat" />
-  <button id="ekleBtn">Ekle</button>
+  <div class="container">
+    <h1>Menü Yönetimi</h1>
+    <button class="add-button" onclick="yeniUrunEkle()">+ Yeni Ürün</button>
+    <button class="logout" onclick="cikisYap()">Çıkış Yap</button>
+    <table id="menu-table">
+      <thead>
+        <tr>
+          <th>Ürün Adı</th>
+          <th>Fiyat (₺)</th>
+          <th>Durum</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button class="save-button" onclick="degisiklikleriKaydet()">Kaydet</button>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabaseUrl = 'https://qcrbbvokdkyjjfsgffau.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const isletmeId = localStorage.getItem('isletme_id')
+    const tbody = document.querySelector('#menu-table tbody')
+
+    let urunler = []
+
+    async function veriYukle() {
+      const { data, error } = await supabase
+        .from('menu')
+        .select('*')
+        .eq('isletme_id', isletmeId)
+
+      if (error) {
+        alert('Veri alınırken hata oluştu.')
+        return
+      }
+
+      urunler = data
+      tabloyuGuncelle()
+    }
+
+    function tabloyuGuncelle() {
+      tbody.innerHTML = ''
+      urunler.forEach((urun, index) => {
+        const row = document.createElement('tr')
+
+        row.innerHTML = `
+          <td data-label="Ürün Adı">
+            <input type="text" value="${urun.urun_adi}" onchange="urunGuncelle(${index}, 'urun_adi', this.value)">
+          </td>
+          <td data-label="Fiyat">
+            <input type="number" value="${urun.fiyat}" onchange="urunGuncelle(${index}, 'fiyat', this.value)">
+          </td>
+          <td data-label="Durum" class="toggle">
+            <input type="checkbox" ${urun.aktif ? 'checked' : ''} onchange="urunGuncelle(${index}, 'aktif', this.checked)">
+          </td>
+        `
+        tbody.appendChild(row)
+      })
+    }
+
+    function urunGuncelle(index, alan, deger) {
+      urunler[index][alan] = deger
+    }
+
+    function yeniUrunEkle() {
+      urunler.push({
+        urun_adi: '',
+        fiyat: 0,
+        aktif: true,
+        isletme_id: isletmeId
+      })
+      tabloyuGuncelle()
+    }
+
+    async function degisiklikleriKaydet() {
+      await supabase
+        .from('menu')
+        .delete()
+        .eq('isletme_id', isletmeId)
+
+      const { error } = await supabase
+        .from('menu')
+        .insert(urunler)
+
+      if (error) {
+        alert('Kaydetme sırasında hata oluştu.')
+      } else {
+        alert('Menü başarıyla kaydedildi.')
+        veriYukle()
+      }
+    }
+
+    function cikisYap() {
+      localStorage.removeItem('isletme_id')
+      window.location.href = 'login.html'
+    }
+
+    veriYukle()
+  </script>
 </body>
 </html>
