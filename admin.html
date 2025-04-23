@@ -1,106 +1,175 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Menü Yönetim Paneli</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script>
-    const supabase = supabase.createClient(
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yönetim Paneli</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      background: #f2f2f2;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+
+    input, button {
+      padding: 8px;
+      font-size: 14px;
+      width: 100%;
+      margin: 5px 0;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      tr {
+        margin-bottom: 15px;
+      }
+      td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-left: 10px;
+        font-weight: bold;
+        text-align: left;
+      }
+    }
+
+    .active-toggle {
+      text-align: center;
+    }
+
+    .active-toggle input {
+      transform: scale(1.3);
+    }
+  </style>
+</head>
+<body>
+  <h1>Menü Yönetimi</h1>
+
+  <table id="menu-table"></table>
+
+  <h2>Yeni Ürün Ekle</h2>
+  <input type="text" id="kategoriInput" placeholder="Kategori">
+  <input type="text" id="baslikInput" placeholder="Başlık">
+  <input type="text" id="icerikInput" placeholder="İçerik">
+  <input type="number" id="fiyatInput" placeholder="Fiyat">
+  <button id="ekleBtn">Ekle</button>
+
+  <button onclick="logout()" style="margin-top: 20px; background: red; color: white;">Çıkış Yap</button>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabase = createClient(
       'https://qcrbbvokdkyjjfsgffau.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmJidm9rZGt5ampmc2dmZmF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTc1MTAsImV4cCI6MjA2MDg5MzUxMH0.TLCqjWowPhDs1s_rQoYFLOKH4iVAc6SV2zECIcPOAfo'
-    );let isletmeId = localStorage.getItem('isletme_id');
-if (!isletmeId) window.location.href = 'login.html';
+    )
 
-async function fetchMenu() {
-  const { data } = await supabase.from('menu').select('*').eq('isletme_id', isletmeId);
-  const container = document.getElementById('menu-container');
-  container.innerHTML = '';
-  data.forEach(item => {
-    const row = document.createElement('div');
-    row.className = 'grid grid-cols-6 gap-2 p-2 border-b items-center';
-    row.innerHTML = `
-      <input value="${item.kategori}" onchange="updateField('${item.id}', 'kategori', this.value)" />
-      <input value="${item.baslik}" onchange="updateField('${item.id}', 'baslik', this.value)" />
-      <input value="${item.icerik}" onchange="updateField('${item.id}', 'icerik', this.value)" />
-      <input value="${item.fiyat}" onchange="updateField('${item.id}', 'fiyat', this.value)" />
-      <span class="text-sm">${item.durum}</span>
-      <button onclick="toggleDurum('${item.id}', '${item.durum}')" class="text-xs bg-gray-200 px-2 py-1 rounded">Değiştir</button>
-    `;
-    container.appendChild(row);
-  });
-}
+    const isletmeId = localStorage.getItem("isletme_id")
+    if (!isletmeId) location.href = "login.html"
 
-async function updateField(id, field, value) {
-  await supabase.from('menu').update({ [field]: value }).eq('id', id);
-}
+    async function getMenu() {
+      const { data } = await supabase.from("menuler").select("*").eq("isletme_id", isletmeId)
+      const table = document.getElementById("menu-table")
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Kategori</th>
+            <th>Başlık</th>
+            <th>İçerik</th>
+            <th>Fiyat</th>
+            <th>Aktif</th>
+            <th>Sil</th>
+          </tr>
+        </thead>
+        <tbody>
+      `
+      data.forEach(item => {
+        table.innerHTML += `
+          <tr>
+            <td data-label="Kategori"><input value="${item.kategori}" onchange="updateMenu(${item.id}, 'kategori', this.value)"></td>
+            <td data-label="Başlık"><input value="${item.baslik}" onchange="updateMenu(${item.id}, 'baslik', this.value)"></td>
+            <td data-label="İçerik"><input value="${item.icerik}" onchange="updateMenu(${item.id}, 'icerik', this.value)"></td>
+            <td data-label="Fiyat"><input type="number" value="${item.fiyat}" onchange="updateMenu(${item.id}, 'fiyat', this.value)"></td>
+            <td class="active-toggle" data-label="Aktif">
+              <input type="checkbox" ${item.durum ? "checked" : ""} onchange="toggleDurum(${item.id}, this.checked)">
+            </td>
+            <td data-label="Sil"><button onclick="deleteMenu(${item.id})">Sil</button></td>
+          </tr>
+        `
+      })
+      table.innerHTML += "</tbody>"
+    }
 
-async function toggleDurum(id, mevcut) {
-  const yeni = mevcut === 'Aktif' ? 'Pasif' : 'Aktif';
-  await supabase.from('menu').update({ durum: yeni }).eq('id', id);
-  fetchMenu();
-}
+    window.updateMenu = async function(id, field, value) {
+      await supabase.from("menuler").update({ [field]: value }).eq("id", id)
+    }
 
-async function yeniUrunEkle() {
-  const kategori = document.getElementById('yeniKategori').value;
-  const baslik = document.getElementById('yeniBaslik').value;
-  const icerik = document.getElementById('yeniIcerik').value;
-  const fiyat = document.getElementById('yeniFiyat').value;
-  await supabase.from('menu').insert({
-    kategori, baslik, icerik, fiyat, durum: 'Aktif', isletme_id: isletmeId
-  });
-  fetchMenu();
-}
+    window.toggleDurum = async function(id, value) {
+      await supabase.from("menuler").update({ durum: value }).eq("id", id)
+    }
 
-async function sifreDegistir() {
-  const mevcut = document.getElementById('mevcutSifre').value;
-  const yeni = document.getElementById('yeniSifre').value;
-  const { data } = await supabase.from('isletmeler').select('*').eq('id', isletmeId).eq('sifre', mevcut);
-  if (data.length > 0) {
-    await supabase.from('isletmeler').update({ sifre: yeni }).eq('id', isletmeId);
-    alert('Şifre güncellendi');
-  } else {
-    alert('Mevcut şifre yanlış');
-  }
-}
+    window.deleteMenu = async function(id) {
+      await supabase.from("menuler").delete().eq("id", id)
+      getMenu()
+    }
 
-function cikisYap() {
-  localStorage.clear();
-  window.location.href = 'login.html';
-}
+    document.getElementById("ekleBtn").addEventListener("click", async () => {
+      const kategori = document.getElementById("kategoriInput").value.trim();
+      const baslik = document.getElementById("baslikInput").value.trim();
+      const icerik = document.getElementById("icerikInput").value.trim();
+      const fiyat = parseFloat(document.getElementById("fiyatInput").value);
 
-window.onload = fetchMenu;
+      if (!kategori || !baslik || !icerik || isNaN(fiyat)) {
+        alert("Tüm alanları doldurun.");
+        return;
+      }
 
+      const { error } = await supabase.from("menuler").insert([
+        {
+          kategori, baslik, icerik, fiyat, durum: true, isletme_id: isletmeId
+        }
+      ])
+
+      if (error) {
+        alert("Ekleme başarısız: " + error.message)
+      } else {
+        alert("Ürün eklendi.")
+        location.reload()
+      }
+    })
+
+    window.logout = function () {
+      localStorage.removeItem("isletme_id")
+      window.location.href = "login.html"
+    }
+
+    getMenu()
   </script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="p-4 bg-gray-50 text-gray-800">
-  <div class="max-w-3xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Menü Yönetim Paneli</h1>
-    <div class="grid grid-cols-6 font-semibold border-b pb-2 mb-2">
-      <div>Kategori</div>
-      <div>Başlık</div>
-      <div>İçerik</div>
-      <div>Fiyat</div>
-      <div>Durum</div>
-      <div>Değiştir</div>
-    </div>
-    <div id="menu-container"></div><h2 class="mt-8 text-xl font-semibold">Yeni Ürün Ekle</h2>
-<div class="grid grid-cols-4 gap-2 my-2">
-  <input id="yeniKategori" placeholder="Kategori" class="border p-1" />
-  <input id="yeniBaslik" placeholder="Başlık" class="border p-1" />
-  <input id="yeniIcerik" placeholder="İçerik" class="border p-1" />
-  <input id="yeniFiyat" placeholder="Fiyat" class="border p-1" />
-</div>
-<button onclick="yeniUrunEkle()" class="bg-blue-600 text-white px-4 py-1 rounded">Ekle</button>
-
-<h2 class="mt-8 text-xl font-semibold">Şifre Değiştir</h2>
-<div class="grid grid-cols-2 gap-2 my-2">
-  <input id="mevcutSifre" type="password" placeholder="Mevcut Şifre" class="border p-1" />
-  <input id="yeniSifre" type="password" placeholder="Yeni Şifre" class="border p-1" />
-</div>
-<button onclick="sifreDegistir()" class="bg-yellow-500 text-white px-4 py-1 rounded">Şifreyi Değiştir</button>
-<button onclick="cikisYap()" class="bg-red-600 text-white px-4 py-1 rounded ml-2">Çıkış Yap</button>
-
-  </div>
 </body>
 </html>
